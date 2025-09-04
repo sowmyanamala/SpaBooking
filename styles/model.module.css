@@ -1,93 +1,218 @@
-.profileEdit{
-
+.profileEdit {
 }
 
-.profileEdit ul, .quickLinks ul{ padding-left: 0; }
-.profileEdit ul li{ display: inline-block }
-.profileEdit ul li img{ width: 100px; }
+.profileEdit ul,
+.quickLinks ul {
+  padding-left: 0;
+}
+.profileEdit ul li {
+  display: inline-block;
+}
+.profileEdit ul li img {
+  width: 100px;
+}
 
-.quickLinks ul li { display: inline-block; margin-right: 30px; }
-.quickLinks ul li a{ padding: 10px 25px; background-color: #f6b1d6; }
+.quickLinks ul li {
+  display: inline-block;
+  margin-right: 30px;
+}
+.quickLinks ul li a {
+  padding: 10px 25px;
+  background-color: #f6b1d6;
+}
 
-.profileEdit ul li:first-child{ width: 100px; }
-.availBox{ display: flex; align-items: flex-start; }
-.availList{ display: flex; align-items: flex-start; justify-content:space-around; border-bottom: 1px solid #ccc; }
-.timeList{ list-style: none; margin: 10px 30px; }
-.availBox input{ width: 200px;}
-.timeBox2{ margin-left: 20px; margin-right: 20px; }
-.save{ margin-top: 30px; padding: 8px 20px; }
-
-
+.profileEdit ul li:first-child {
+  width: 100px;
+}
+.availBox {
+  display: flex;
+  align-items: flex-start;
+}
+.availList {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  border-bottom: 1px solid #ccc;
+}
+.timeList {
+  list-style: none;
+  margin: 10px 30px;
+}
+.availBox input {
+  width: 200px;
+}
+.timeBox2 {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+.save {
+  margin-top: 30px;
+  padding: 8px 20px;
+}
 
 .table {
-    display: table;
-    border-collapse: collapse;
-    width: 100%;
-  }
-  
-  .row {
-    display: table-row;
-  }
-  
-  .header {
-    font-weight: bold;
-  }
-  
-  .cell {
-    float: left;
-    padding: 8px;
-    border: 1px solid black;
-    width: 150px;
-  }
-  
-  .adminMenu{ background-color: #4b0176; margin-right: 40px; min-width: 170px; }
-  .adminMenu ul{ padding-left: 30px; padding-right: 30px; }
-  .adminMenu a{ color: #ffffff; display: block; margin-bottom: 15px; }
-  .servicesBack{ display: block; }
-  .servicesBack li{ margin: 3px 10px; background-color: rgb(250 242 255); padding: 2px 10px; display: inline-block; }
-  .servicesBack li input{ display: inline-block; }
-  .servicesBack li label{ display: inline-block; font-weight: 400;  }
-  .primary_area{ display: block;}
-  .primary_area li{ display: block !important;}
-  .primary_area li:first-child{ width: 100% !important;}
-  .lebeltop{ display: flex;}
+  display: table;
+  border-collapse: collapse;
+  width: 100%;
+}
 
-  .unavailable{  padding: 5px; background-color: antiquewhite; display: flex; }
-  .unavailForm{  background-color: antiquewhite; ; padding: 20px; }
-  .unavailable label{ margin-top: 10px; }
-  .daily{background: #81c4ff;
-    padding: 20px;
-    margin-top: 20px;
-  }
-  .daily p{ display: flex; gap: 10px; }
-  .sometimes{ background: #b1f4de;
-    margin-top: 30px;
-    padding: 20px;
-  }
-.everydayStart{ width: 100px; }
-.weeklysavebtn{
+.row {
+  display: table-row;
+}
+
+.header {
+  font-weight: bold;
+}
+
+.cell {
+  float: left;
+  padding: 8px;
+  border: 1px solid black;
+  width: 150px;
+}
+
+.adminMenu {
+  background: #f6b1d6;
+  box-shadow: 0 4px 4px;
+  margin-top: -40px;
+  margin-right: 40px;
+  width: 200px !important;
+  height: 100vh;
+  position: fixed;
+}
+.adminMenu ul {
+  padding-left: 30px;
+  padding-right: 30px;
+}
+.adminMenu a {
+  color: #333;
+  display: block;
+  margin-bottom: 15px;
+}
+.servicesBack {
+  display: block;
+}
+.servicesBack li {
+  margin: 3px 10px;
+  background-color: rgb(250 242 255);
+  padding: 2px 10px;
+  display: inline-block;
+}
+.servicesBack li input {
+  display: inline-block;
+}
+.servicesBack li label {
+  display: inline-block;
+  font-weight: 400;
+}
+.primary_area {
+  display: block;
+}
+.primary_area li {
+  display: block !important;
+}
+.primary_area li:first-child {
+  width: 100% !important;
+}
+.lebeltop {
+  display: flex;
+}
+
+.unavailable {
+  padding: 5px;
+  background-color: antiquewhite;
+  display: flex;
+}
+.unavailForm {
+  background-color: antiquewhite;
+  padding: 20px;
+}
+.unavailable label {
+  margin-top: 10px;
+}
+.daily {
+  background: #81c4ff;
+  padding: 20px;
+  margin-top: 20px;
+}
+.daily p {
+  display: flex;
+  gap: 10px;
+}
+.sometimes {
+  background: #b1f4de;
+  margin-top: 30px;
+  padding: 20px;
+}
+.everydayStart {
+  width: 100px;
+}
+.weeklysavebtn {
   width: 160px !important;
   text-align: center;
   margin: auto;
   padding: 14px 20px !important;
-  background-color: #F02698 !important;
+  background-color: #f02698 !important;
 }
-.message{ text-align: center;}
+.message {
+  text-align: center;
+}
 
-
-
-  @media only screen and (max-width: 1000px) {
-
-    .adminMenu{ width: 100%; }
-    .availBox input{ width: 130px; }
-    .adminMenu ul{ padding-left: 5px; padding-right: 5px; }
-    .adminMenu a{ display: inline-block; margin: 10px 13px; }
-    .availList{padding-left: 0; }
-    .timeList{margin-left: 0; margin-right: 0; font-size: 14px; }
-    .availList_header .timeList{ margin-left: -120px; }
-    .availList_header .timeList{ font-size: 18px;}
-    .timeBox2{margin-left: 3px; margin-right: 10px; }
-
-
-
+@media only screen and (max-width: 1000px) {
+  .adminMenu {
+    width: 100%;
   }
+  .availBox input {
+    width: 130px;
+  }
+  .adminMenu ul {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+  .adminMenu a {
+    display: inline-block;
+    margin: 10px 13px;
+  }
+  .availList {
+    padding-left: 0;
+  }
+  .timeList {
+    margin-left: 0;
+    margin-right: 0;
+    font-size: 14px;
+  }
+  .availList_header .timeList {
+    margin-left: -120px;
+  }
+  .availList_header .timeList {
+    font-size: 18px;
+  }
+  .timeBox2 {
+    margin-left: 3px;
+    margin-right: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .adminMenu {
+    width: 140px !important; /* smaller width for mobile */
+    font-size: 0.85rem; /* reduce text size */
+  }
+
+  .adminMenu a {
+    font-size: 0.85rem; /* smaller links */
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .adminMenu {
+    width: 50px !important; /* extra small for very small screens */
+    font-size: 0.75rem;
+  }
+
+  .adminMenu a {
+    font-size: 0.75rem;
+    margin-bottom: 8px;
+  }
+}

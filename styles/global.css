@@ -84,16 +84,25 @@ input {
 .menu {
   display: flex;
   float: right;
-  margin-top: 10px;
+  margin-top: 0px;
+  width: 100%;
+  height: 50px;
+  background: #f6b1d6;
+  position: fixed;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 4px;
 }
 .menu li {
   padding: 0 30px;
   font-size: 1rem;
   list-style: none;
+  margin-left: 80%;
+  margin-top: 8px;
 }
 
 .menu li a {
   font-size: 1rem;
+  color: #333;
 }
 .mt0 {
   margin-top: 0 !important;
@@ -282,6 +291,16 @@ input[type="submit"]:hover {
 }
 .main-admin-layout {
   display: flex;
+  width: 100%;
+}
+
+.dash {
+  margin-left: 20%;
+}
+
+.navIcon {
+  background-color: transparent;
+  visibility: hidden;
 }
 
 .fullwidth {
@@ -718,13 +737,17 @@ select {
     margin-right: 0;
   }
 
-  .menu {
+  .dash {
+    margin-left: 30%;
+  }
+
+  /* .menu {
     display: inline-block;
     width: 100%;
   }
   .menu li {
     float: left;
-  }
+  } */
   .filterLabel {
     display: inline-block;
   }
@@ -769,9 +792,25 @@ select {
     display: block;
   }
 }
+@media (max-width: 768px) {
+  .menu {
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
+    padding: 10px;
+  }
+
+  .menu li {
+    margin: 10px 0;
+  }
+  .menu li a {
+    font-size: 14px;
+    text-align: center;
+  }
+}
 @media only screen and (max-width: 400px) {
   .menu li a {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .logomain {
@@ -783,6 +822,17 @@ select {
   .viewbyicon img {
     width: 20px;
     height: auto;
+  }
+  .dash {
+    margin-left: 20%;
+  }
+
+  .navIcon {
+    visibility: visible;
+  }
+
+  .navText {
+    visibility: hidden;
   }
 }
 

@@ -4,13 +4,18 @@ import styles from "./layout.module.css";
 import utilStyles from "../../styles/utils.module.css";
 import modelStyle from "../../styles/model.module.css";
 import Link from "next/link";
+import { BookOpenCheck, CalendarDays, LogOut, Mail, User } from "lucide-react";
 
 const name = "Massage at Home";
 export const siteTitle = "Muew Muew site title";
 
 export default function Layout({ children, home, availability }) {
   return (
-    <div className={availability ? styles.container : styles.containerAvail}>
+    <div
+      className={
+        // availability ? styles.container :
+        styles.containerAvail
+      }>
       <Head>
         <link rel="icon" href="/favicon.ico" />
         <meta
@@ -44,53 +49,71 @@ export default function Layout({ children, home, availability }) {
           </>
         ) : (
           <>
-            <Link href="/">
-              <Image
-                priority
-                src="/images/logo.png"
-                className={utilStyles.borderCircle}
-                height={81}
-                width={300}
-                alt=""
-              />
-            </Link>
-            <ul className="menu">
-              <li>
-                {" "}
-                <Link href="/"> Home </Link>{" "}
-              </li>
-              <li>
-                {" "}
-                <Link href="/"> Visit frontend site </Link>{" "}
-              </li>
-              <li>
-                {" "}
-                <Link href="/support"> Contact Support </Link>{" "}
-              </li>
-              <li>
-                {" "}
-                <Link href="/logout"> Logout </Link>{" "}
-              </li>
-            </ul>
+            {/* <ul className="menu"> */}
+            {/* <Link href="/">
+                <Image
+                  priority
+                  src="/images/logo.png"
+                  className={utilStyles.borderCircle}
+                  height={81}
+                  width={200}
+                  alt=""
+                />
+              </Link> */}
+
+            {/* <li>
+                <Link href="/support"> Contact Support </Link>
+              </li> */}
+            {/* <li>
+                <Link href="/logout"> Logout </Link>
+              </li> */}
+            {/* </ul> */}
           </>
         )}
       </header>
       <main className="main-admin-layout">
         <section className={modelStyle.adminMenu}>
           <ul>
-            <Link href="/model-backend/orders"> Orders </Link>
-            <Link href="/model-backend/profile"> Profile Info </Link>
-            <Link href="/model-backend/availability"> Availability </Link>
+            <Link href="/">
+              <Image
+                priority
+                src="/images/logo.png"
+                className={utilStyles.borderCircle}
+                height={81}
+                width={200}
+                alt=""
+              />
+            </Link>
+            <Link href="/model-backend/orders">
+              <p className="navText">Orders</p>
+              <BookOpenCheck className="navIcon" size={20} />
+            </Link>
+            <Link href="/model-backend/profile">
+              <p className="navText">Profile Info</p>
+              <User className="navIcon" size={20} />
+            </Link>
+            <Link href="/model-backend/availability">
+              <p className="navText">Availability</p>
+              <CalendarDays className="navIcon" size={20} />
+            </Link>
+            <Link href="/support">
+              <p className="navText">Contact</p>
+              <Mail className="navIcon" size={20} />
+            </Link>
+            <Link href="/logout">
+              <p className="navText">Logout</p>
+              <LogOut className="navIcon" size={20} />
+            </Link>
           </ul>
         </section>
-        <section>{children}</section>
+        <section className="dash">{children}</section>
       </main>
-      {!home && (
+      {/* {!home && (
         <div className={styles.backToHome}>
           <Link href="/">← Back to home</Link>
         </div>
       )}
-      <div className=""> Footer goes here </div>
+      <div className=""> Footer goes here </div> */}
     </div>
   );
 }
