@@ -29,6 +29,7 @@ const Profile = () => {
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(null);
+  const [updateLoader, setUpdateloader] = useState(false);
   const [error, setError] = useState(null);
   const [id, setId] = useState(null);
   const [model, setModel] = useState({
@@ -195,7 +196,7 @@ const Profile = () => {
   const handleModelUpdate = async (e) => {
     e.preventDefault();
     try {
-      setLoading(true);
+      setUpdateloader(true);
       model.modelId = id;
 
       model.selectedAreas_primary = model.selectedAreas_primary.toString();
@@ -214,13 +215,14 @@ const Profile = () => {
       setMessage(
         'After you are done here, please go to the "Availability" tab from the left sidebar to set your available time.'
       );
-      setLoading(false);
 
       model.selectedAreas_primary = model.selectedAreas_primary.split(",");
       model.selectedAreas = model.selectedAreas.split(",");
       model.location_type = model.location_type.split(",");
     } catch (error) {
       console.error(error);
+    } finally {
+      setUpdateloader(false);
     }
   };
 
@@ -267,6 +269,7 @@ const Profile = () => {
       : "";
 
     const modelid = localStorage.getItem("token");
+    console.log(modelid);
     setId(modelid);
     let url = "https://tsm.spagram.com/api/single-model.php?id=" + modelid;
 
@@ -330,7 +333,7 @@ const Profile = () => {
       </Head>
       <h5> Profile Status: {model.status} </h5>
       <h2> {initialMSg} </h2>
-      <h2> Personal info </h2>
+      <h2 className={modelCss.title}> Personal info </h2>
       <section className={modelCss.profileEdit}>
         {!loading ? (
           <form onSubmit={handleModelUpdate} className={modelCss.form}>
@@ -376,18 +379,19 @@ const Profile = () => {
             </div>
 
             {/* Email */}
-            <div>
+            <div className={modelCss.formGroup}>
               <label>Email</label>
               <input
                 type="text"
                 onChange={handleInputChange}
                 name="email"
                 value={model.email}
+                className={modelCss.input}
               />
             </div>
 
             {/* Gender */}
-            <div>
+            <div className={modelCss.formGroup}>
               <label>Gender</label>
               <select
                 name="gender"
@@ -484,29 +488,31 @@ const Profile = () => {
             </div>
 
             {/* inCall Location */}
-            <div>
+            <div className={modelCss.formGroup}>
               <label>inCall Location</label>
               <input
                 type="text"
                 onChange={handleInputChange}
                 name="incall_location"
                 value={model.incall_location}
+                className={modelCss.input}
               />
             </div>
 
             {/* Rate */}
-            <div>
+            <div className={modelCss.formGroup}>
               <label>Rate per hour($)</label>
               <input
                 type="text"
                 onChange={handleInputChange}
                 name="price"
                 value={model.price}
+                className={modelCss.input}
               />
             </div>
 
             {/* Ethnicity */}
-            <div>
+            <div className={modelCss.formGroup}>
               <label>Ethnicity</label>
               <select
                 name="ethnicity"
@@ -523,29 +529,31 @@ const Profile = () => {
             </div>
 
             {/* Age */}
-            <div>
+            <div className={modelCss.formGroup}>
               <label>Age</label>
               <input
                 type="text"
                 onChange={handleInputChange}
                 name="age"
                 value={model.age}
+                className={modelCss.input}
               />
             </div>
 
             {/* Height */}
-            <div>
+            <div className={modelCss.formGroup}>
               <label>Height (in feet, ie 5.7)</label>
               <input
                 type="text"
                 onChange={handleInputChange}
                 name="height"
                 value={model.height}
+                className={modelCss.input}
               />
             </div>
 
             {/* Color */}
-            <div>
+            <div className={modelCss.formGroup}>
               <label>Color</label>
               <select
                 name="color"
@@ -596,16 +604,16 @@ const Profile = () => {
             {/* Submit */}
             <div className={modelCss.submitBox}>
               <button className={modelCss.submitBtn} type="submit">
-                Update Profile
+                {updateLoader ? "Processing..." : "Update Profile"}
               </button>
-              {loading && (
+              {updateLoader && (
                 <img width="30px" src="images/loading.gif" alt="loading" />
               )}
             </div>
             <p className={modelCss.message}>{message}</p>
           </form>
         ) : (
-          <h2>Updating…</h2>
+          <h2>Loading...</h2>
         )}
       </section>
     </Layout>

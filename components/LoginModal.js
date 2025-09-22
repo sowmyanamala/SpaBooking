@@ -206,10 +206,8 @@ export default function LoginModal({ onClose, user }) {
         loginData
       );
 
-      console.log("Login response:", response.data);
-
       if (response.data && response.data.success == "1") {
-        const { token, name } = response.data;
+        const { usertoken: token, name } = response.data;
         if (user === "model") {
           localStorage.setItem("token", token);
           localStorage.setItem("modelName", name || loginData.email);
@@ -245,8 +243,7 @@ export default function LoginModal({ onClose, user }) {
               width="24"
               height="24"
               fill="none"
-              viewBox="0 0 24 24"
-            >
+              viewBox="0 0 24 24">
               <path
                 stroke="#333"
                 strokeWidth="2"
@@ -289,8 +286,7 @@ export default function LoginModal({ onClose, user }) {
               width="24"
               height="24"
               fill="none"
-              viewBox="0 0 24 24"
-            >
+              viewBox="0 0 24 24">
               <path
                 stroke="#333"
                 strokeWidth="2"
