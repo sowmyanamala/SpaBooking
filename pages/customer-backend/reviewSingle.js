@@ -1,53 +1,63 @@
 import React, { useState } from 'react';
-import Link from 'next/link';
+import CustomerReview from '../../components/customerReview';
 import modelStyle from '../../styles/model.module.css';
 import axios from 'axios';
 
+function ReviewSingle({ reviewData }) {
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
+  const handleReviewSubmitted = (reviewData) => {
+    setReviewSubmitted(true);
+    setShowReviewForm(false);
+    // You can add additional logic here like refreshing the parent component
+  };
 
+  return (
+    <div className={modelStyle.reviewItem}>
+      <div className={modelStyle.reviewHeader}>
+        <h4>Review for {reviewData?.model_name || 'Andrea Sherri Parton'}</h4>
+        <p>Service Date: {reviewData?.service_date || 'Recent'}</p>
+      </div>
+
+      {!reviewSubmitted && !showReviewForm && (
+        <button
+          onClick={() => setShowReviewForm(true)}
+          className={modelStyle.reviewButton}
+        >
+          Write Review
+        </button>
+      )}
+
+      {showReviewForm && (
+        <CustomerReview
+          orderId={reviewData?.order_id}
+          modelId={reviewData?.model_id}
+          modelName={reviewData?.model_name || 'Andrea Sherri Parton'}
+          onReviewSubmitted={handleReviewSubmitted}
+        />
+      )}
+
+      {reviewSubmitted && (
+        <div className={modelStyle.reviewCompleted}>
+          ✅ Review completed - Thank you for your feedback!
+        </div>
+      )}
+    </div>
+  );
+}
 
 function ReviewSingle() {
 
-    // const changestats = (status) => {
-    //     const xx = changeOrderStatus(status);
-    //     updateOrder(status);
-        
-    // }
-
-    // const changestats = async (status) => {
-    //     try {
-    //         const reviewtoUpdate = {id: reviewto.id, reviewto_status: status, customer_id: reviewto.customer_id};
-    //         const response = await axios.post('https://tsm.spagram.com/api/update-reviewto.php', reviewtoUpdate);
-    //         console.log('s response', response.data );
-    //         changeOrderStatus(status);
-  
-    //       } catch (err) {
-    //         console.log(err)
-    //         // setError(err.message);
-    //       } finally {
-    //         // setLoading(false);
-    //       }
-    // }
-
-  // console.log('sssss', reviewto);
-/*{ <td> {reviewto.reviewto_status} <br/> {reviewto.reviewto_status == "Initiated"?  <div><button onClick={()=>changestats("Approved")}>Approve</button>  <button onClick={()=>changestats("Denied")}>Deny</button> </div> : ''} </td>  }*/
-
-/* { <form onSubmit={handleReviewUpdate}>
-<div class="review-card">
-    <div class="rating">4.5</div>
-      <div class="user-details">
-      <h2 class="user-name">John Doe</h2>
-      <p class="comment">"Great product! Highly recommended."</p>
-  </div>
-</div>
-<button className='button' type="submit"> Update </button>
-<p className='message'> {message} </p>
-</form> }*/
   return (
-      <tr>
-            <td> Provide Review to Andrea Sherri Parton {/*reviewto? reviewto.model_id : '' */} </td>
-      </tr>
-    
+    <tr>
+      <td>
+        <form>
+          {/* Form content would go here */}
+        </form>
+      </td>
+      <td>Provide Review to Andrea Sherri Parton</td>
+    </tr>
   );
 }
 
