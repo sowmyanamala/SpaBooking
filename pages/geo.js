@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Layout from '../components/layout';
 
 const GeolocationExample = () => {
   const [latitude, setLatitude] = useState(null);
@@ -53,78 +54,80 @@ const GeolocationExample = () => {
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-      <h1>Find Nearby Therapists</h1>
-      <p>Get your location to connect with therapists in your area</p>
+    <Layout>
+      <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
+        <h1>Find Nearby Therapists</h1>
+        <p>Get your location to connect with therapists in your area</p>
 
-      <button
-        className="button"
-        onClick={getLocation}
-        disabled={loading}
-        style={{
-          opacity: loading ? 0.6 : 1,
-          cursor: loading ? 'not-allowed' : 'pointer'
-        }}
-      >
-        {loading ? 'Getting Location...' : 'Get My Location'}
-      </button>
+        <button
+          className="button"
+          onClick={getLocation}
+          disabled={loading}
+          style={{
+            opacity: loading ? 0.6 : 1,
+            cursor: loading ? 'not-allowed' : 'pointer'
+          }}
+        >
+          {loading ? 'Getting Location...' : 'Get My Location'}
+        </button>
 
-      {loading && (
-        <div style={{ marginTop: '20px', color: '#666' }}>
-          📍 Locating you...
-        </div>
-      )}
-
-      {error && (
-        <div className="error" style={{
-          marginTop: '20px',
-          padding: '15px',
-          backgroundColor: '#ffebee',
-          border: '1px solid #f44336',
-          borderRadius: '4px',
-          color: '#d32f2f'
-        }}>
-          ⚠️ {error}
-        </div>
-      )}
-
-      {latitude !== null && longitude !== null && !loading && (
-        <div style={{
-          marginTop: '20px',
-          padding: '20px',
-          backgroundColor: '#e8f5e8',
-          border: '1px solid #4caf50',
-          borderRadius: '4px'
-        }}>
-          <h3 style={{ margin: '0 0 15px 0', color: '#2e7d32' }}>📍 Your Location</h3>
-          <div style={{ marginBottom: '10px' }}>
-            <strong>Latitude:</strong> {formatCoordinate(latitude, 'lat')}
+        {loading && (
+          <div style={{ marginTop: '20px', color: '#666' }}>
+            📍 Locating you...
           </div>
-          <div style={{ marginBottom: '15px' }}>
-            <strong>Longitude:</strong> {formatCoordinate(longitude, 'lng')}
-          </div>
-          <div style={{ fontSize: '14px', color: '#666' }}>
-            Location accuracy: High precision GPS
-          </div>
-        </div>
-      )}
+        )}
 
-      {latitude !== null && longitude !== null && (
-        <div style={{ marginTop: '15px', textAlign: 'center' }}>
-          <button
-            className="button"
-            onClick={() => {
-              setLatitude(null);
-              setLongitude(null);
-              setError(null);
-            }}
-            style={{ backgroundColor: '#ff9800' }}
-          >
-            Clear Location
-          </button>
-        </div>
-      )}
-    </div>
+        {error && (
+          <div className="error" style={{
+            marginTop: '20px',
+            padding: '15px',
+            backgroundColor: '#ffebee',
+            border: '1px solid #f44336',
+            borderRadius: '4px',
+            color: '#d32f2f'
+          }}>
+            ⚠️ {error}
+          </div>
+        )}
+
+        {latitude !== null && longitude !== null && !loading && (
+          <div style={{
+            marginTop: '20px',
+            padding: '20px',
+            backgroundColor: '#e8f5e8',
+            border: '1px solid #4caf50',
+            borderRadius: '4px'
+          }}>
+            <h3 style={{ margin: '0 0 15px 0', color: '#2e7d32' }}>📍 Your Location</h3>
+            <div style={{ marginBottom: '10px' }}>
+              <strong>Latitude:</strong> {formatCoordinate(latitude, 'lat')}
+            </div>
+            <div style={{ marginBottom: '15px' }}>
+              <strong>Longitude:</strong> {formatCoordinate(longitude, 'lng')}
+            </div>
+            <div style={{ fontSize: '14px', color: '#666' }}>
+              Location accuracy: High precision GPS
+            </div>
+          </div>
+        )}
+
+        {latitude !== null && longitude !== null && (
+          <div style={{ marginTop: '15px', textAlign: 'center' }}>
+            <button
+              className="button"
+              onClick={() => {
+                setLatitude(null);
+                setLongitude(null);
+                setError(null);
+              }}
+              style={{ backgroundColor: '#ff9800' }}
+            >
+              Clear Location
+            </button>
+          </div>
+        )}
+      </div>
+    </Layout>
   );
 };
 
