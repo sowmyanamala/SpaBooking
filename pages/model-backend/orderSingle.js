@@ -61,15 +61,13 @@ export default function OrderSingle({ order, changeOrderStatus }) {
               <button
                 className={styles.approveBtn}
                 onClick={() => handleUpdate("Approved")}
-                disabled={saving}
-              >
+                disabled={saving}>
                 {saving ? "Saving…" : "Approve"}
               </button>
               <button
                 className={styles.denyBtn}
                 onClick={() => handleUpdate("Denied")}
-                disabled={saving}
-              >
+                disabled={saving}>
                 {saving ? "Saving…" : "Deny"}
               </button>
             </div>

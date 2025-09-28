@@ -314,7 +314,7 @@ const Availability = () => {
         // setModel({...model, phone: '89999'})
 
         // setModel({availability: result.availability })
-        console.log("received data", url, result);
+        console.log("received data", result);
         if (result.availability != null) {
           setAvailArr(result.availability);
           console.log("hello", result.availableweekly, result.unavailable);
@@ -360,7 +360,10 @@ const Availability = () => {
             Make me Unavailable for a uncertain period of time
           </label>
         </div>
-        <input className={modelCss.weeklysavebtn} type="submit" value="Save" />
+        {/* <button   value="Save" ><button/> */}
+        <button type="submit" className={modelCss.weeklysavebtn}>
+          Save
+        </button>
         <p className={modelCss.message}> {unavailMessage} </p>
       </form>
 
@@ -580,7 +583,7 @@ const Availability = () => {
             ))}
         </div>
 
-        <form onSubmit={handleAvaiability}>
+        {/* <form onSubmit={handleAvaiability}>
           <div className={modelCss.availBox}>
             <div className={modelCss.timeBox}>
               <label>Start Date</label>
@@ -615,71 +618,51 @@ const Availability = () => {
               {loading ? <img width="30px" src={loading_url} /> : ""}
             </div>
           </div>
-        </form>
-      </div>
-
-      {/* <div class={modelCss.sometimes}>
-        <div>
-          <strong> If your are sometimes available </strong>
-          <ul className={availHeaderClass}>
-            <li className={modelCss.timeList}> Start </li>
-            <li className={modelCss.timeList}>End</li>
-          </ul>
-          {availArr &&
-            availArr.map((avail) => (
-              <ul className={modelCss.availList} key={avail.id}>
-                <li className={modelCss.timeList}>
-                  {getTimefromTS(avail.start)}
-                </li>
-                <li className={modelCss.timeList}>
-                  {getTimefromTS(avail.end)}
-                </li>
-                <li className={modelCss.timeList}>
-                  <button onClick={() => removeTime(avail.id, this)}>
-                    Delete
-                  </button>
-                </li>
-              </ul>
-            ))}
-        </div>
+        </form> */}
 
         <form onSubmit={handleAvaiability}>
-          <div className={modelCss.availBox}>
-            <div className="timeBox">
-              <div>Start Date</div>
-              <DatePicker
-                showTimeSelect
-                timeFormat="HH:mm"
-                selected={startDate}
-                onChange={(date) => setStartDate(date)}
-                timeClassName={handleColor}
-                timeIntervals={60}
-                dateFormat="yyyy-MM-dd HH:mm"
-              />
+          <div className={modelCss.availcard}>
+            <h3>If you are sometimes available</h3>
+
+            <div className={modelCss.timerow}>
+              <div className={modelCss.timebox}>
+                <label>Start Date</label>
+                <DatePicker
+                  showTimeSelect
+                  timeFormat="HH:mm"
+                  selected={startDate}
+                  onChange={(date) => setStartDate(date)}
+                  timeClassName={handleColor}
+                  timeIntervals={60}
+                  dateFormat="yyyy-MM-dd HH:mm"
+                  className="date-input"
+                />
+              </div>
+
+              <div className={modelCss.timebox}>
+                <label>End Date</label>
+                <DatePicker
+                  showTimeSelect
+                  timeFormat="HH:mm"
+                  selected={endDate}
+                  onChange={(date) => setEndDate(date)}
+                  timeClassName={handleColor}
+                  timeIntervals={60}
+                  dateFormat="yyyy-MM-dd HH:mm"
+                  className="date-input"
+                />
+              </div>
             </div>
 
-            <div className={modelCss.timeBox2}>
-              <div>End Date</div>
-              <DatePicker
-                showTimeSelect
-                timeFormat="HH:mm"
-                selected={endDate}
-                onChange={(date) => setEndDate(date)}
-                timeClassName={handleColor}
-                timeIntervals={60}
-                dateFormat="yyyy-MM-dd HH:mm"
-              />
-            </div>
-
-            <div class="submitbox">
-              <button type="submit" className={modelCss.save} onClick={addTime}>
+            <div className={modelCss.submitrow}>
+              <button type="submit" className={modelCss.btn} onClick={addTime}>
                 Add
               </button>
-              {loading ? <img width="30px" src={loading_url} /> : " "}
+              {loading && <img width="30px" src={loading_url} alt="loading" />}
             </div>
           </div>
         </form>
-      </div> */}
+      </div>
     </Layout>
   );
 };
