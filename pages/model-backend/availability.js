@@ -382,7 +382,8 @@ const Availability = () => {
               className={modelCss.select}
               name="everydayStart"
               value={weeeklyAvailData.everydayStart}
-              onChange={handleWeeklyChange}>
+              onChange={handleWeeklyChange}
+            >
               <option value="">Select</option>
               {[
                 "9 am",
@@ -422,7 +423,8 @@ const Availability = () => {
               className={modelCss.select}
               name="everydayEnd"
               value={weeeklyAvailData.everydayEnd}
-              onChange={handleWeeklyChange}>
+              onChange={handleWeeklyChange}
+            >
               <option value="">Select</option>
               {[
                 "9 am",
@@ -464,7 +466,8 @@ const Availability = () => {
               className={modelCss.select}
               name="excludeEvery1"
               value={weeeklyAvailData.excludeEvery1}
-              onChange={handleWeeklyChange}>
+              onChange={handleWeeklyChange}
+            >
               <option value="">Select</option>
               {[
                 "Saturday",
@@ -488,7 +491,8 @@ const Availability = () => {
               className={modelCss.select}
               name="excludeEvery2"
               value={weeeklyAvailData.excludeEvery2}
-              onChange={handleWeeklyChange}>
+              onChange={handleWeeklyChange}
+            >
               <option value="">Select</option>
               {[
                 "Saturday",
@@ -570,7 +574,8 @@ const Availability = () => {
                 <li className={modelCss.timeList}>
                   <button
                     className={modelCss.deleteBtn}
-                    onClick={() => removeTime(avail.id, this)}>
+                    onClick={() => removeTime(avail.id, this)}
+                  >
                     Delete
                   </button>
                 </li>

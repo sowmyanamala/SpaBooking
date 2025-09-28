@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
-import axios from "axios";
 import styles from "../../styles/LoginModal.module.css";
+import { Eye, EyeOff } from "lucide-react";
 
 const usPhoneRegex = /^(\+1\s?)?(\d{3}|\(\d{3}\))[-.\s]?\d{3}[-.\s]?\d{4}$/;
 
@@ -15,11 +15,10 @@ const ClientReg = ({
   errors,
   setErrors,
   error,
-  loading,
+  setStep,
 }) => {
-  const [submitting, setSubmitting] = useState(false);
+  const [hide, setHide] = useState(false);
   const [submitError, setSubmitError] = useState("");
-
   const hc = handleChange || (() => () => {});
   const doValidate = validateClient || (() => true);
 
@@ -49,52 +48,9 @@ const ClientReg = ({
   };
 
   const submit = async () => {
-    setSubmitError("");
     if (phoneInvalid) return;
-    if (!doValidate()) return;
-
-    try {
-      setSubmitting(true);
-
-      // match msgdb.customers columns
-      const payload = {
-        name: (formData?.name || "").trim(),
-        email: (formData?.email || "").trim(),
-        phone: digitsOnly(formData?.phone || ""),
-        password: formData?.password || "",
-        address: formData?.address || "",
-        city: (formData?.city || "").trim(),
-        zip: normalizeZip(formData?.zip || ""),
-        current_models: String(
-          formData?.current_models ??
-            formData?.selected_model ??
-            formData?.current_modelid ??
-            ""
-        ),
-        squre_customer_id: String(
-          formData?.squre_customer_id ??
-            formData?.square_customer_id ??
-            "pending"
-        ),
-      };
-
-      const resp = await axios.post(
-        `${API_BASE}/api/register-customer.php`,
-        payload,
-        { headers: { "Content-Type": "application/json" } }
-      );
-
-      if (resp?.data?.success === "1") {
-        setRegType?.("login");
-      } else {
-        setSubmitError(resp?.data?.message || "Registration failed.");
-      }
-    } catch (e) {
-      setSubmitError(
-        e?.response?.data?.message || e?.message || "Network error."
-      );
-    } finally {
-      setSubmitting(false);
+    if (validateClient()) {
+      setStep(2);
     }
   };
 
@@ -104,8 +60,7 @@ const ClientReg = ({
 
       <div
         className={styles.inputGroup}
-        onKeyDown={(e) => e.key === "Enter" && submit()}
-      >
+        onKeyDown={(e) => e.key === "Enter" && submit()}>
         <label htmlFor="phone">Phone number</label>
         <input
           id="phone"
@@ -114,7 +69,7 @@ const ClientReg = ({
           autoComplete="tel"
           placeholder="Phone number"
           value={formData?.phone ?? ""}
-          onChange={hc("phone")}
+          onChange={handleChange("phone")}
           onBlur={(e) => validatePhoneInline(e.target.value)}
           aria-invalid={Boolean(errors?.phone || phoneInvalid)}
         />
@@ -131,7 +86,7 @@ const ClientReg = ({
           autoComplete="email"
           placeholder="Email"
           value={formData?.email ?? ""}
-          onChange={hc("email")}
+          onChange={handleChange("email")}
           aria-invalid={Boolean(errors?.email)}
         />
         {!!errors?.email && <p className="required">{errors.email}</p>}
@@ -143,53 +98,41 @@ const ClientReg = ({
           autoComplete="name"
           placeholder="Full name"
           value={formData?.name ?? ""}
-          onChange={hc("name")}
+          onChange={handleChange("name")}
           aria-invalid={Boolean(errors?.name)}
         />
         {!!errors?.name && <p className="required">{errors.name}</p>}
-
-        <label htmlFor="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          autoComplete="new-password"
-          placeholder="Password"
-          value={formData?.password ?? ""}
-          onChange={hc("password")}
-          aria-invalid={Boolean(errors?.password)}
-        />
-        {!!errors?.password && <p className="required">{errors.password}</p>}
-
-        <label htmlFor="address">Address</label>
-        <input
-          id="address"
-          type="text"
-          autoComplete="address-line1"
-          placeholder="Street address"
-          value={formData?.address ?? ""}
-          onChange={hc("address")}
-        />
-
-        <label htmlFor="city">City</label>
-        <input
-          id="city"
-          type="text"
-          autoComplete="address-level2"
-          placeholder="City"
-          value={formData?.city ?? ""}
-          onChange={hc("city")}
-        />
-
-        <label htmlFor="zip">ZIP</label>
-        <input
-          id="zip"
-          type="text"
-          inputMode="numeric"
-          autoComplete="postal-code"
-          placeholder="ZIP"
-          value={formData?.zip ?? ""}
-          onChange={hc("zip")}
-        />
+        <div className="password-div">
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            type={hide ? "text" : "password"}
+            autoComplete="new-password"
+            placeholder="Password"
+            value={formData?.password ?? ""}
+            onChange={handleChange("password")}
+            aria-invalid={Boolean(errors?.password)}
+          />
+          {hide && (
+            <Eye
+              onClick={() => {
+                setHide(false);
+              }}
+              className="eye"
+            />
+          )}
+          {!hide && (
+            <EyeOff
+              onClick={() => {
+                setHide(true);
+              }}
+              className="eye"
+            />
+          )}
+          {!!errors?.password && (
+            <p className="required-p">{errors.password}</p>
+          )}
+        </div>
       </div>
 
       <div className={styles.switchText}>
@@ -198,8 +141,7 @@ const ClientReg = ({
           className={styles.linkText}
           onClick={() => setRegType("login")}
           role="button"
-          tabIndex={0}
-        >
+          tabIndex={0}>
           Log In
         </span>
       </div>
@@ -210,10 +152,9 @@ const ClientReg = ({
 
       <button
         className={styles.continueBtn}
-        disabled={loading || submitting || phoneInvalid}
-        onClick={submit}
-      >
-        {loading || submitting ? "processing..." : "Submit"}
+        disabled={phoneInvalid}
+        onClick={submit}>
+        {"Next"}
       </button>
     </>
   );

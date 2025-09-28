@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const ImageUpload = () => {
   const [image, setImage] = useState(null);
@@ -18,10 +18,10 @@ const ImageUpload = () => {
     setError(null);
 
     const formData = new FormData();
-    formData.append('image', image);
+    formData.append("image", image);
 
-    fetch('https://tsm.spagram.com/api/testfileuploader.php', {
-      method: 'POST',
+    fetch("https://tsm.spagram.com/api/testfileuploader.php", {
+      method: "POST",
       body: formData,
     })
       .then((response) => response.json())
