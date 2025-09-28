@@ -1,4 +1,6 @@
+import { useState } from "react";
 import styles from "../../styles/LoginModal.module.css";
+import { Eye, EyeOff } from "lucide-react";
 
 const ModelLogin = ({
   handleLoginChange,
@@ -10,9 +12,10 @@ const ModelLogin = ({
   loading,
   handleLogin,
 }) => {
+  const [hide, setHide] = useState(false);
   return (
     <>
-      <h2> Login up as Model</h2>
+      <h2> Login up as Therapist</h2>
       <div className={styles.inputGroup}>
         <label>Email </label>
         <input
@@ -22,13 +25,32 @@ const ModelLogin = ({
           onChange={handleLoginChange("email")}
         />
         {errors.email && <p className={"required"}>{errors.email}</p>}
-        <input
-          type="password"
-          placeholder="Password"
-          value={loginData.password}
-          onChange={handleLoginChange("password")}
-        />
-        {errors.password && <p className={"required"}>{errors.password}</p>}
+        <div className="password-div">
+          <input
+            type={hide ? "text" : "password"}
+            placeholder="Password"
+            value={loginData.password}
+            onChange={handleLoginChange("password")}
+          />
+          {errors.password && <p className={"required"}>{errors.password}</p>}
+          {hide && (
+            <Eye
+              onClick={() => {
+                setHide(false);
+              }}
+              className="eye-m"
+            />
+          )}
+          {!hide && (
+            <EyeOff
+              onClick={() => {
+                setHide(true);
+              }}
+              className="eye-m"
+            />
+          )}
+        </div>
+        {!!errors?.password && <p className="required-p">{errors.password}</p>}
       </div>
       {error && <p className="required">{error}</p>}
       {/* <div className="container">
@@ -37,12 +59,12 @@ const ModelLogin = ({
           Sign Up
         </button>
       </div> */}
-            <div className={styles.switchText}>
-  Don’t have an account?{" "}
-  <span className={styles.linkText} onClick={() => setRegType("signup")}>
-    Sign Up
-  </span>
-</div>
+      <div className={styles.switchText}>
+        Don’t have an account?{" "}
+        <span className={styles.linkText} onClick={() => setRegType("signup")}>
+          Sign Up
+        </span>
+      </div>
       <div className="flex">
         <button
           className={styles.continueBtn}
