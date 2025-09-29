@@ -65,7 +65,7 @@
 // }
 
 // pages/components/LoginModal.js
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import styles from "../styles/LoginModal.module.css";
 import { BASE_URL } from "../baseurl/Baseurl";
 import axios from "axios";
@@ -74,6 +74,7 @@ import ModelLogin from "./onboarding/ModelLogin";
 import ClientLogin from "./onboarding/ClientLogin";
 import ModelReg from "./onboarding/ModelReg";
 import ClientReg from "./onboarding/ClientReg";
+import ClientRegStep2 from "./onboarding/ClientRegStep2";
 
 export default function LoginModal({ onClose, user }) {
   const [regType, setRegType] = useState("signup");
@@ -96,12 +97,9 @@ export default function LoginModal({ onClose, user }) {
     name: "",
     email: "",
     password: "",
-    // address: "",
-    // selected_model: "",
-    // cardname: "",
-    // card: "",
-    // expiration: "",
-    // security_code: ""
+    address: "",
+    zip: "",
+    city: "",
   });
   const [errors, setErrors] = useState({});
   const [error, setError] = useState("");
@@ -134,7 +132,15 @@ export default function LoginModal({ onClose, user }) {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+  const validateClient2 = () => {
+    const newErrors = {};
+    if (!clientFormData.address) newErrors.address = "required";
+    if (!clientFormData.zip) newErrors.zip = "required";
+    if (!clientFormData.city) newErrors.city = "required";
 
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
   const handleChange = (field) => (e) => {
     setFormData({ ...formData, [field]: e.target.value });
   };
@@ -147,53 +153,80 @@ export default function LoginModal({ onClose, user }) {
     setLoginData({ ...loginData, [field]: e.target.value });
   };
 
-  const handleFinalSubmit = async () => {
+  const doValidate = validateClient2 || (() => true);
+  const usPhoneRegex = /^(\+1\s?)?(\d{3}|\(\d{3}\))[-.\s]?\d{3}[-.\s]?\d{4}$/;
+  const phoneInvalid = useMemo(() => {
+    const v = formData?.phone || "";
+    return v && !usPhoneRegex.test(v);
+  }, [formData?.phone]);
+
+  const validatePhoneInline = (value) => {
+    if (typeof setErrors !== "function") return;
+    if (value && !usPhoneRegex.test(value)) {
+      setErrors((prev) => ({
+        ...prev,
+        phone: "Please enter a valid US phone number",
+      }));
+    } else {
+      setErrors((prev) => ({ ...prev, phone: "" }));
+    }
+  };
+
+  const digitsOnly = (s = "") => (s.match(/\d+/g) || []).join("");
+  const normalizeZip = (s = "") => {
+    const d = (s.match(/\d+/g) || []).join("");
+    if (d.length === 9) return `${d.slice(0, 5)}-${d.slice(5)}`;
+    if (d.length === 5) return d;
+    return s.trim();
+  };
+
+  const submit = async () => {
     setError("");
-    setLoading(true);
+    if (phoneInvalid) return;
+    if (!doValidate()) return;
+    console.log("form", clientFormData);
     try {
-      const payload = user === "model" ? formData : clientFormData;
-
-      console.log("Payload", payload);
-
-      const response = await axios.post(
-        user === "model"
-          ? `${BASE_URL}cmodel.php`
-          : `${BASE_URL}register-customer.php`,
+      setLoading(true);
+      // match msgdb.customers columns
+      const payload = {
+        name: (clientFormData?.name || "").trim(),
+        email: (clientFormData?.email || "").trim(),
+        phone: digitsOnly(clientFormData?.phone || ""),
+        password: clientFormData?.password || "",
+        address: clientFormData?.address || "",
+        city: (clientFormData?.city || "").trim(),
+        zip: normalizeZip(clientFormData?.zip || ""),
+        current_models: String(
+          clientFormData?.current_models ??
+            clientFormData?.selected_model ??
+            clientFormData?.current_modelid ??
+            ""
+        ),
+        squre_customer_id: String(
+          clientFormData?.squre_customer_id ??
+            clientFormData?.square_customer_id ??
+            "pending"
+        ),
+      };
+      const resp = await axios.post(
+        `${BASE_URL}/register-customer.php`,
         payload,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { headers: { "Content-Type": "application/json" } }
       );
-      console.log(response);
-      if (response.data.success == "1") {
-        const { token, name } = response.data;
 
-        if (user === "model") {
-          localStorage.setItem("token", token);
-          localStorage.setItem("modelName", name || formData.name);
-          window.location.reload();
-          Router.push("/model-backend/orders");
-        } else {
-          localStorage.setItem("customertoken", token);
-          localStorage.setItem("customerName", name || clientFormData.name);
-          //Router.push("/");
-          onClose();
-          window.location.reload();
-        }
+      if (resp?.data?.success === "1") {
+        setRegType?.("login");
       } else {
-        setError(
-          response.data.message ||
-            "Email/Password do not match. Please try again!"
-        );
+        setError(resp?.data?.message || "Registration failed.");
       }
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      console.log(e);
+      setError(e?.response?.data?.message || e?.message || "Network error.");
     } finally {
       setLoading(false);
     }
   };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -206,10 +239,8 @@ export default function LoginModal({ onClose, user }) {
         loginData
       );
 
-      console.log("Login response:", response.data);
-
       if (response.data && response.data.success == "1") {
-        const { token, name } = response.data;
+        const { usertoken: token, name } = response.data;
         if (user === "model") {
           localStorage.setItem("token", token);
           localStorage.setItem("modelName", name || loginData.email);
@@ -245,8 +276,7 @@ export default function LoginModal({ onClose, user }) {
               width="24"
               height="24"
               fill="none"
-              viewBox="0 0 24 24"
-            >
+              viewBox="0 0 24 24">
               <path
                 stroke="#333"
                 strokeWidth="2"
@@ -264,7 +294,7 @@ export default function LoginModal({ onClose, user }) {
               formData={formData}
               setFormData={setFormData}
               errors={errors}
-              handleFinalSubmit={handleFinalSubmit}
+              // handleFinalSubmit={handleFinalSubmit}
               error={error}
               loading={loading}
             />
@@ -289,8 +319,7 @@ export default function LoginModal({ onClose, user }) {
               width="24"
               height="24"
               fill="none"
-              viewBox="0 0 24 24"
-            >
+              viewBox="0 0 24 24">
               <path
                 stroke="#333"
                 strokeWidth="2"
@@ -301,17 +330,33 @@ export default function LoginModal({ onClose, user }) {
           </div>
 
           {regType === "signup" ? (
-            <ClientReg
-              handleChange={handleClientChange}
-              setRegType={setRegType}
-              validateClient={validateClient}
-              formData={clientFormData}
-              errors={errors}
-              setFormData={setClientFormData}
-              handleFinalSubmit={handleFinalSubmit}
-              error={error}
-              loading={loading}
-            />
+            <>
+              {step === 1 && (
+                <ClientReg
+                  handleChange={handleClientChange}
+                  setRegType={setRegType}
+                  validateClient={validateClient}
+                  formData={clientFormData}
+                  errors={errors}
+                  setStep={setStep}
+                  error={error}
+                  validatePhoneInline={validatePhoneInline}
+                />
+              )}
+
+              {step === 2 && (
+                <ClientRegStep2
+                  handleChange={handleClientChange}
+                  handleSubmit={submit}
+                  formData={clientFormData}
+                  errors={errors}
+                  setFormData={setClientFormData}
+                  setStep={setStep}
+                  error={error}
+                  loading={loading}
+                />
+              )}
+            </>
           ) : (
             <ClientLogin
               handleLoginChange={handleLoginChange}

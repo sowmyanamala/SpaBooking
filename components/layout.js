@@ -1,4 +1,3 @@
-
 // import Head from "next/head";
 // import Link from "next/link";
 // import styles from "./layout.module.css";
@@ -116,8 +115,6 @@
 //   </div>
 // )}
 
-
-        
 //       </header>
 
 //       <main>{children}</main>
@@ -157,8 +154,7 @@ export default function Layout({ children, home }) {
     if (customerId && customerName) {
       setIsLoggedIn(true);
       setUser(customerName || "Client");
-    }
-    else {
+    } else {
       localStorage.removeItem("customertoken");
       localStorage.removeItem("customerName");
     }
@@ -184,7 +180,6 @@ export default function Layout({ children, home }) {
       </Head>
 
       <header className={styles.header}>
-
         <div className={styles.left}>
           <a href={CURRENT_URL} className={styles.logoContainer}>
             <img
@@ -201,11 +196,9 @@ export default function Layout({ children, home }) {
           <Link href="/services">Services</Link>
         </nav>
 
-
         <div
           className={styles.menuIcon}
-          onClick={() => setShowDropdown((prev) => !prev)}
-        >
+          onClick={() => setShowDropdown((prev) => !prev)}>
           <div className={styles.bar}></div>
           <div className={styles.bar}></div>
           <div className={styles.bar}></div>
@@ -220,8 +213,7 @@ export default function Layout({ children, home }) {
                   onClick={() =>
                     (window.location.href =
                       "https://www.tristatemassage.com/contact")
-                  }
-                >
+                  }>
                   Help Center
                 </div>
                 <div
@@ -229,17 +221,15 @@ export default function Layout({ children, home }) {
                   onClick={() => {
                     setUser("model");
                     setShowLoginModal(true);
-                  }}
-                >
-                  Login / Sign Up (As Model)
+                  }}>
+                  Login / Sign Up (As Therapist)
                 </div>
                 <div
                   className={styles.dropdownButton}
                   onClick={() => {
                     setUser("client");
                     setShowLoginModal(true);
-                  }}
-                >
+                  }}>
                   Login / Sign Up (As Client)
                 </div>
               </>

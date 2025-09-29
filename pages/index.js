@@ -25,7 +25,6 @@ export default function Home() {
     fetch(filteredUrl)
       .then((res) => res.json())
       .then((data) => {
-        console.log("API Response", data);
         setTherapists(Array.isArray(data) ? data : []);
       })
       .catch((err) => console.error(err));
@@ -82,8 +81,7 @@ export default function Home() {
                 className={styles.badge}
                 onClick={() =>
                   setFilters((f) => ({ ...f, serviceType: String(s.id) }))
-                }
-              >
+                }>
                 {s.name}
               </button>
             ))}
@@ -118,8 +116,7 @@ export default function Home() {
         />
         <button
           onClick={() => setShowFilters((s) => !s)}
-          className={styles.toggleButton}
-        >
+          className={styles.toggleButton}>
           {showFilters ? "Hide Filters" : "Show Filters"}
         </button>
       </div>
@@ -131,8 +128,7 @@ export default function Home() {
             className={styles.filterItem}
             name="location"
             value={filters.location}
-            onChange={handleInputChange}
-          >
+            onChange={handleInputChange}>
             <option value="">Location</option>
             <option value="newyork">New York</option>
             <option value="newjersey">New Jersey</option>
@@ -143,8 +139,7 @@ export default function Home() {
             className={styles.filterItem}
             name="gender"
             value={filters.gender}
-            onChange={handleInputChange}
-          >
+            onChange={handleInputChange}>
             <option value="">Gender</option>
             <option value="female">Female</option>
             <option value="male">Male</option>
@@ -155,16 +150,14 @@ export default function Home() {
             className={styles.filterItem}
             name="ethnicity"
             value={filters.ethnicity}
-            onChange={handleInputChange}
-          >
+            onChange={handleInputChange}>
             {/* ensure Ethnicities[0] is a placeholder like "Ethnicity" */}
             {Ethnicities.map((eth, index) => (
               <option
                 key={index}
                 value={
                   index === 0 ? "" : eth.toLowerCase().replace(/[^a-z]/gi, "")
-                }
-              >
+                }>
                 {eth}
               </option>
             ))}
@@ -174,8 +167,7 @@ export default function Home() {
             className={styles.filterItem}
             name="age"
             value={filters.age}
-            onChange={handleInputChange}
-          >
+            onChange={handleInputChange}>
             <option value="">Age</option>
             <option value="18-19">18-19</option>
             <option value="20-30">20-30</option>
@@ -188,8 +180,7 @@ export default function Home() {
             className={styles.filterItem}
             name="serviceType"
             value={filters.serviceType}
-            onChange={handleInputChange}
-          >
+            onChange={handleInputChange}>
             <option value="">Service Type</option>
             {services.map((service) => (
               <option key={service.id} value={service.id}>
@@ -220,8 +211,7 @@ export default function Home() {
               onClick={() => {
                 localStorage.setItem("selectedTherapist", JSON.stringify(t));
                 window.location.href = "/therapistDetails";
-              }}
-            >
+              }}>
               <img
                 src={t.picture_url || "/images/default.jpg"}
                 alt={t.name}
