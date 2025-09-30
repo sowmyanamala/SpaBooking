@@ -563,3 +563,52 @@
   margin: 0;
   color: #666;
 } */
+/* Map Section Styles */
+.mapSection {
+  margin: 3rem 0;
+  padding: 2rem 0;
+  background: linear-gradient(135deg, #fef7f7 0%, #fdf2f8 100%);
+  border-radius: 16px;
+  border: 1px solid #f3e8ff;
+}
+
+.mapSectionHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 0 2rem;
+}
+
+.mapSectionTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #f472b6;
+  margin-bottom: 1rem;
+}
+
+.mapSectionDescription {
+  font-size: 1.2rem;
+  color: #9f7aea;
+  margin-bottom: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.toggleMapButton {
+  background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(244, 114, 182, 0.25);
+}
+
+.toggleMapButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(244, 114, 182, 0.3);
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+}
