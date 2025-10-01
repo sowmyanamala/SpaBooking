@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import styles from "../../styles/LoginModal.module.css";
+import { Eye, EyeOff } from "lucide-react";
 
 const usPhoneRegex = /^(\+1\s?)?(\d{3}|\(\d{3}\))[-.\s]?\d{3}[-.\s]?\d{4}$/;
 
@@ -18,7 +19,7 @@ const ModelReg = ({
   const [phoneTouched, setPhoneTouched] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
-
+  const [hide, setHide] = useState(false);
   const handlePhoneChange = (e) => {
     const value = e.target.value;
     setFormData((prev) => ({ ...prev, phone: value }));
@@ -144,14 +145,31 @@ const ModelReg = ({
           autoComplete="name"
         />
         {errors.name && <p className={"required"}>{errors.name}</p>}
-
-        <input
-          type="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange("password")}
-          autoComplete="new-password"
-        />
+        <div className="password-div">
+          <input
+            type={hide ? "text" : "password"}
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange("password")}
+            autoComplete="new-password"
+          />
+          {hide && (
+            <Eye
+              onClick={() => {
+                setHide(false);
+              }}
+              className="eye-m"
+            />
+          )}
+          {!hide && (
+            <EyeOff
+              onClick={() => {
+                setHide(true);
+              }}
+              className="eye-m"
+            />
+          )}
+        </div>
         {errors.password && <p className={"required"}>{errors.password}</p>}
 
         {/* Optional profile image (saved as base64 in formData.image; we convert to Blob on submit) */}
@@ -173,8 +191,7 @@ const ModelReg = ({
       <button
         className={styles.continueBtn}
         onClick={submit}
-        disabled={submitting || loading}
-      >
+        disabled={submitting || loading}>
         {submitting || loading ? "processing..." : "Submit"}
       </button>
     </>

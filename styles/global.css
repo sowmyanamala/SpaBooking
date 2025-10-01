@@ -5,7 +5,7 @@
   --muted: 125, 125, 140;
   --card: 255, 255, 255;
   --sidebar-bg: 20, 28, 36; /* dark sidebar like Skyline */
-  --sidebar-border: 255, 255, 255, .06;
+  --sidebar-border: 255, 255, 255, 0.06;
   --radius: 16px;
 }
 
@@ -240,6 +240,12 @@ input[type="submit"]:hover {
 .required {
   color: red;
   margin-top: -30px;
+  font-size: smaller;
+}
+
+.required-p {
+  color: red;
+  margin-top: -20px;
   font-size: smaller;
 }
 
@@ -510,6 +516,21 @@ input[type="submit"]:hover {
   padding: 0;
 }
 
+.password-div {
+  position: relative;
+}
+
+.eye {
+  position: absolute;
+  top: 50px;
+  right: 3%;
+}
+
+.eye-m {
+  position: absolute;
+  top: 15px;
+  right: 3%;
+}
 .bookingpage .bookarea {
   margin-left: 20px;
 }
@@ -947,25 +968,28 @@ select {
 }
 
 /* for admin-backend/layout.js*/
-:root{
+:root {
   /* Rose accent (soft, not neon) */
-  --accent: 255, 96, 128;       /* rgb */
-  --bg: 255, 252, 253;          /* page background */
-  --text: 34, 34, 38;           /* main text */
-  --muted: 132, 132, 145;       /* muted labels */
-  --card: 255, 255, 255;        /* cards & surfaces */
+  --accent: 255, 96, 128; /* rgb */
+  --bg: 255, 252, 253; /* page background */
+  --text: 34, 34, 38; /* main text */
+  --muted: 132, 132, 145; /* muted labels */
+  --card: 255, 255, 255; /* cards & surfaces */
 
   /* make sidebar LIGHT like your screenshot */
   --sidebar-bg: 255, 255, 255;
-  --sidebar-border: 255, 96, 128, .14;  /* subtle pink edge */
+  --sidebar-border: 255, 96, 128, 0.14; /* subtle pink edge */
 
   --radius: 18px;
 }
 
 /* optional: faint rosy wash across the page */
-body{
-  background:
-    radial-gradient(60rem 30rem at 50% -10%, rgba(var(--accent), .03), transparent 60%),
+body {
+  background: radial-gradient(
+      60rem 30rem at 50% -10%,
+      rgba(var(--accent), 0.03),
+      transparent 60%
+    ),
     rgb(var(--bg));
   color: rgb(var(--text));
 }

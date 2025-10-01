@@ -1,5 +1,5 @@
 // pages/components/LoginModal.js
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import styles from "../styles/LoginModal.module.css";
 import { BASE_URL } from "../baseurl/Baseurl";
 import axios from "axios";
@@ -8,6 +8,7 @@ import ModelLogin from "./onboarding/ModelLogin";
 import ClientLogin from "./onboarding/ClientLogin";
 import ModelReg from "./onboarding/ModelReg";
 import ClientReg from "./onboarding/ClientReg";
+import ClientRegStep2 from "./onboarding/ClientRegStep2";
 
 // --- helper: decode JWT payload safely ---
 function parseJwt(token) {
@@ -27,6 +28,7 @@ function parseJwt(token) {
 
 export default function LoginModal({ onClose, user }) {
   const [regType, setRegType] = useState("signup");
+  const [step, setStep] = useState(1);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [formData, setFormData] = useState({
     name: "",
@@ -39,6 +41,9 @@ export default function LoginModal({ onClose, user }) {
     name: "",
     email: "",
     password: "",
+    address: "",
+    zip: "",
+    city: "",
   });
   const [errors, setErrors] = useState({});
   const [error, setError] = useState("");
@@ -55,6 +60,7 @@ export default function LoginModal({ onClose, user }) {
     console.log("Login validation result:", isValid);
     return isValid;
   };
+
   const validateModel = () => {
     const e = {};
     if (!formData.phone) e.phone = "required";
@@ -64,6 +70,7 @@ export default function LoginModal({ onClose, user }) {
     setErrors(e);
     return Object.keys(e).length === 0;
   };
+
   const validateClient = () => {
     const e = {};
     if (!clientFormData.phone) e.phone = "required";
@@ -74,12 +81,53 @@ export default function LoginModal({ onClose, user }) {
     return Object.keys(e).length === 0;
   };
 
-  const handleChange = (field) => (e) =>
+  const validateClient2 = () => {
+    const newErrors = {};
+    if (!clientFormData.address) newErrors.address = "required";
+    if (!clientFormData.zip) newErrors.zip = "required";
+    if (!clientFormData.city) newErrors.city = "required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (field) => (e) => {
     setFormData({ ...formData, [field]: e.target.value });
-  const handleClientChange = (field) => (e) =>
+  };
+
+  const handleClientChange = (field) => (e) => {
     setClientFormData({ ...clientFormData, [field]: e.target.value });
-  const handleLoginChange = (field) => (e) =>
+  };
+
+  const handleLoginChange = (field) => (e) => {
     setLoginData({ ...loginData, [field]: e.target.value });
+  };
+
+  // Phone validation
+  const usPhoneRegex = /^(\+1\s?)?(\d{3}|\(\d{3}\))[-.\s]?\d{3}[-.\s]?\d{4}$/;
+  const phoneInvalid = useMemo(() => {
+    const v = clientFormData?.phone || "";
+    return v && !usPhoneRegex.test(v);
+  }, [clientFormData?.phone]);
+
+  const validatePhoneInline = (value) => {
+    if (typeof setErrors !== "function") return;
+    if (value && !usPhoneRegex.test(value)) {
+      setErrors((prev) => ({
+        ...prev,
+        phone: "Please enter a valid US phone number",
+      }));
+    } else {
+      setErrors((prev) => ({ ...prev, phone: "" }));
+    }
+  };
+
+  const digitsOnly = (s = "") => (s.match(/\d+/g) || []).join("");
+  const normalizeZip = (s = "") => {
+    const d = (s.match(/\d+/g) || []).join("");
+    if (d.length === 9) return `${d.slice(0, 5)}-${d.slice(5)}`;
+    if (d.length === 5) return d;
+    return s.trim();
+  };
 
   // --- normalize saving tokens + modelId ---
   const saveAuthAndRedirect = ({ token, id, name }, isModel, nameFallback) => {
@@ -134,34 +182,49 @@ export default function LoginModal({ onClose, user }) {
     }
   };
 
-  const handleFinalSubmit = async () => {
+  // Client registration submit
+  const submit = async () => {
     setError("");
-    setLoading(true);
+    if (phoneInvalid) return;
+    if (!validateClient2()) return;
+    console.log("form", clientFormData);
     try {
-      const payload = user === "model" ? formData : clientFormData;
-      const url =
-        user === "model"
-          ? `${BASE_URL}cmodel.php`
-          : `${BASE_URL}register-customer.php`;
-      const res = await axios.post(url, payload, {
-        headers: { "Content-Type": "application/json" },
-      });
+      setLoading(true);
+      // match msgdb.customers columns
+      const payload = {
+        name: (clientFormData?.name || "").trim(),
+        email: (clientFormData?.email || "").trim(),
+        phone: digitsOnly(clientFormData?.phone || ""),
+        password: clientFormData?.password || "",
+        address: clientFormData?.address || "",
+        city: (clientFormData?.city || "").trim(),
+        zip: normalizeZip(clientFormData?.zip || ""),
+        current_models: String(
+          clientFormData?.current_models ??
+            clientFormData?.selected_model ??
+            clientFormData?.current_modelid ??
+            ""
+        ),
+        squre_customer_id: String(
+          clientFormData?.squre_customer_id ??
+            clientFormData?.square_customer_id ??
+            "pending"
+        ),
+      };
+      const resp = await axios.post(
+        `${BASE_URL}register-customer.php`,
+        payload,
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-      if (res.data?.success == "1") {
-        const { usertoken, name, id } = res.data;
-        saveAuthAndRedirect(
-          { token: usertoken, id, name },
-          user === "model",
-          user === "model" ? formData.name : clientFormData.name
-        );
+      if (resp?.data?.success === "1") {
+        setRegType("login");
       } else {
-        setError(
-          res.data?.message || "Email/Password do not match. Please try again!"
-        );
+        setError(resp?.data?.message || "Registration failed.");
       }
     } catch (e) {
-      console.error(e);
-      setError("An error occurred. Please try again.");
+      console.log(e);
+      setError(e?.response?.data?.message || e?.message || "Network error.");
     } finally {
       setLoading(false);
     }
@@ -227,26 +290,26 @@ export default function LoginModal({ onClose, user }) {
 
   return (
     <div className={styles.modalOverlay}>
-      <div className={styles.modalContent}>
-        <div className={styles.closeButton} onClick={onClose}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke="#333"
-              strokeWidth="2"
-              strokeLinecap="round"
-              d="M6 6l12 12M18 6L6 18"
-            />
-          </svg>
-        </div>
+      {user === "model" ? (
+        <div className={styles.modalContent}>
+          <div className={styles.closeButton} onClick={onClose}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="#333"
+                strokeWidth="2"
+                strokeLinecap="round"
+                d="M6 6l12 12M18 6L6 18"
+              />
+            </svg>
+          </div>
 
-        {user === "model" ? (
-          regType === "signup" ? (
+          {regType === "signup" ? (
             <ModelReg
               handleChange={handleChange}
               setRegType={setRegType}
@@ -254,7 +317,6 @@ export default function LoginModal({ onClose, user }) {
               formData={formData}
               setFormData={setFormData}
               errors={errors}
-              handleFinalSubmit={handleFinalSubmit}
               error={error}
               loading={loading}
             />
@@ -269,32 +331,69 @@ export default function LoginModal({ onClose, user }) {
               setRegType={setRegType}
               loading={loading}
             />
-          )
-        ) : regType === "signup" ? (
-          <ClientReg
-            handleChange={handleClientChange}
-            setRegType={setRegType}
-            validateClient={validateClient}
-            formData={clientFormData}
-            errors={errors}
-            setFormData={setClientFormData}
-            handleFinalSubmit={handleFinalSubmit}
-            error={error}
-            loading={loading}
-          />
-        ) : (
-          <ClientLogin
-            handleLoginChange={handleLoginChange}
-            handleLogin={handleLogin}
-            loginData={loginData}
-            error={error}
-            errors={errors}
-            validateLogin={validateLogin}
-            setRegType={setRegType}
-            loading={loading}
-          />
-        )}
-      </div>
+          )}
+        </div>
+      ) : (
+        <div className={styles.modalContent}>
+          <div className={styles.closeButton} onClick={onClose}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke="#333"
+                strokeWidth="2"
+                strokeLinecap="round"
+                d="M6 6l12 12M18 6L6 18"
+              />
+            </svg>
+          </div>
+
+          {regType === "signup" ? (
+            <>
+              {step === 1 && (
+                <ClientReg
+                  handleChange={handleClientChange}
+                  setRegType={setRegType}
+                  validateClient={validateClient}
+                  formData={clientFormData}
+                  errors={errors}
+                  setStep={setStep}
+                  error={error}
+                  validatePhoneInline={validatePhoneInline}
+                />
+              )}
+
+              {step === 2 && (
+                <ClientRegStep2
+                  handleChange={handleClientChange}
+                  handleSubmit={submit}
+                  formData={clientFormData}
+                  errors={errors}
+                  setFormData={setClientFormData}
+                  setStep={setStep}
+                  error={error}
+                  loading={loading}
+                />
+              )}
+            </>
+          ) : (
+            <ClientLogin
+              handleLoginChange={handleLoginChange}
+              handleLogin={handleLogin}
+              loginData={loginData}
+              error={error}
+              errors={errors}
+              validateLogin={validateLogin}
+              setRegType={setRegType}
+              loading={loading}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
