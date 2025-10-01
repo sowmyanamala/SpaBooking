@@ -1,0 +1,144 @@
+ .container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table thead {
+  background-color: #ffb6c1;
+}
+
+.table th {
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  background-color: #ffb6c1;
+}
+
+.table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.statusCell {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.actions {
+  display: flex;
+  gap: 5px;
+}
+
+.approveBtn, .denyBtn {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.approveBtn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.approveBtn:hover {
+  background-color: #45a049;
+}
+
+.denyBtn {
+  background-color: #f44336;
+  color: white;
+}
+
+.denyBtn:hover {
+  background-color: #d32f2f;
+}
+
+.errorMini {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.error {
+  background-color: #ffebee;
+  color: #d32f2f;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.error button {
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.noOrders {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .table {
+    font-size: 14px;
+  }
+  
+  .table th, .table td {
+    padding: 10px;
+  }
+  
+  .actions {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .table {
+    font-size: 12px;
+  }
+  
+  .table th, .table td {
+    padding: 8px;
+  }
+}

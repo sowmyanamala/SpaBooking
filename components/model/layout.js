@@ -6,11 +6,12 @@ import utilStyles from "../../styles/utils.module.css";
 import modelStyle from "../../styles/model.module.css";
 import Link from "next/link";
 import { BookOpenCheck, CalendarDays, LogOut, Mail, User } from "lucide-react";
+// import CrispWithNoSSR from "../crisp";
 
 const name = "Massage at Home";
 export const siteTitle = "Muew Muew site title";
 
-export default function Layout({ children, home, availability }) {
+export default function Layout({ children, home, availability, orders }) {
   const pathname = usePathname();
 
   const navItems = [
@@ -45,7 +46,8 @@ export default function Layout({ children, home, availability }) {
       className={
         // availability ? styles.container :
         styles.containerAvail
-      }>
+      }
+    >
       <Head>
         <link rel="icon" href="/favicon.ico" />
         <meta
@@ -64,15 +66,15 @@ export default function Layout({ children, home, availability }) {
       <header className={styles.header}>
         {home ? (
           <>
-            <h1> Model Backend </h1>
+            <h1> Therapist Backend </h1>
             <ul className="menu">
               <li>
                 {" "}
-                <Link href="/admin-backend"> Home </Link>{" "}
+                <Link href="/admin"> Home </Link>{" "}
               </li>
               <li>
                 {" "}
-                <Link href="/admin-backend/logout"> Logout </Link>
+                <Link href="/admin/logout"> Logout </Link>
               </li>
             </ul>
             <h1 className={utilStyles.heading2Xl}>{name}</h1>
@@ -115,13 +117,13 @@ export default function Layout({ children, home, availability }) {
               />
             </Link>
             {navItems.map(({ href, label, icon: Icon }) => (
-              <li>
+              <li key={href}>
                 <Link
-                  key={href}
                   href={href}
                   className={`${modelStyle.navLink} ${
                     pathname === href ? modelStyle.active : ""
-                  } navText`}>
+                  } navText`}
+                >
                   <Icon
                     className={` ${
                       pathname === href ? modelStyle.active : ""

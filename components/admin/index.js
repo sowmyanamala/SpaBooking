@@ -1,24 +1,85 @@
-import AdminLayout from "@/components/admin/AdminLayout";
+import AdminLayout from "./layout";
+import styles from "./layout.module.css";
+import { useState, useEffect } from "react";
+
 export default function AdminHome() {
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalTherapists: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+    loading: true,
+  });
+
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
+
+  const fetchDashboardStats = async () => {
+    try {
+      // Fetch users count
+      const usersRes = await fetch("/api/admin/users?limit=1&page=1");
+      const usersData = await usersRes.json();
+
+      // Fetch therapists count
+      const therapistsRes = await fetch("/api/admin/therapists?limit=1&page=1");
+      const therapistsData = await therapistsRes.json();
+
+      // Fetch orders data
+      const ordersRes = await fetch(
+        "https://tsm.spagram.com/api/getpendingorders.php"
+      );
+      const ordersData = await ordersRes.json();
+
+      // Calculate total revenue from orders
+      const totalRevenue = Array.isArray(ordersData)
+        ? ordersData.reduce(
+            (sum, order) => sum + (parseFloat(order.amount) || 0),
+            0
+          )
+        : 0;
+
+      setStats({
+        totalUsers: usersData.total || 0,
+        totalTherapists: therapistsData.total || 0,
+        totalOrders: Array.isArray(ordersData) ? ordersData.length : 0,
+        totalRevenue: totalRevenue,
+        recentOrders: Array.isArray(ordersData) ? ordersData : [],
+        loading: false,
+      });
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+      setStats((prev) => ({ ...prev, loading: false }));
+    }
+  };
+
   return (
     <AdminLayout title="Dashboard">
       {/* KPI Cards */}
       <section className={styles.cards}>
         <div className={styles.card}>
-          <p className={styles.cardTitle}>New Users</p>
-          <div className={styles.cardValue}>370</div>
+          <p className={styles.cardTitle}>Total Users</p>
+          <div className={styles.cardValue}>
+            {stats.loading ? "..." : stats.totalUsers}
+          </div>
         </div>
         <div className={styles.card}>
-          <p className={styles.cardTitle}>Shop Items</p>
-          <div className={styles.cardValue}>342</div>
+          <p className={styles.cardTitle}>Total Therapists</p>
+          <div className={styles.cardValue}>
+            {stats.loading ? "..." : stats.totalTherapists}
+          </div>
         </div>
         <div className={styles.card}>
-          <p className={styles.cardTitle}>Today's Sale</p>
-          <div className={styles.cardValue}>13</div>
+          <p className={styles.cardTitle}>Total Orders</p>
+          <div className={styles.cardValue}>
+            {stats.loading ? "..." : stats.totalOrders}
+          </div>
         </div>
         <div className={styles.card}>
-          <p className={styles.cardTitle}>Earnings</p>
-          <div className={styles.cardValue}>$300</div>
+          <p className={styles.cardTitle}>Total Revenue</p>
+          <div className={styles.cardValue}>
+            {stats.loading ? "..." : `$${stats.totalRevenue}`}
+          </div>
         </div>
       </section>
 
@@ -85,83 +146,62 @@ export default function AdminHome() {
         </div>
       </section>
 
-      {/* Table */}
+      {/* Recent Orders Table */}
       <section className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Project</th>
-              <th>Task</th>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Therapist</th>
+              <th>Service</th>
               <th>Date</th>
               <th>Status</th>
+              <th>Amount</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {[
-              {
-                id: "#000001",
-                project: "Alpha project",
-                task: "100%",
-                date: "Oct 27",
-                status: "Done",
-              },
-              {
-                id: "#000002",
-                project: "Beta project",
-                task: "3%",
-                date: "Oct 26",
-                status: "Pending",
-              },
-              {
-                id: "#000003",
-                project: "Gamma project",
-                task: "100%",
-                date: "Oct 25",
-                status: "Done",
-              },
-              {
-                id: "#000004",
-                project: "Alpha project",
-                task: "30%",
-                date: "Oct 25",
-                status: "Pending",
-              },
-              {
-                id: "#000005",
-                project: "Beta project",
-                task: "100%",
-                date: "Oct 25",
-                status: "Done",
-              },
-              {
-                id: "#000006",
-                project: "Gamma project",
-                task: "100%",
-                date: "Oct 20",
-                status: "Done",
-              },
-            ].map((r) => (
-              <tr key={r.id}>
-                <td>{r.id}</td>
-                <td>{r.project}</td>
-                <td>{r.task}</td>
-                <td>{r.date}</td>
-                <td>
-                  <span className={styles.badge}>{r.status}</span>
-                </td>
-                <td>
-                  <a href="#" title="View">
-                    🔍
-                  </a>
-                  &nbsp;&nbsp;
-                  <a href="#" title="Edit">
-                    ✏️
-                  </a>
+            {stats.loading ? (
+              <tr>
+                <td
+                  colSpan="8"
+                  style={{ textAlign: "center", padding: "20px" }}
+                >
+                  Loading recent orders...
                 </td>
               </tr>
-            ))}
+            ) : stats.recentOrders && stats.recentOrders.length > 0 ? (
+              stats.recentOrders.slice(0, 6).map((order) => (
+                <tr key={order.id}>
+                  <td>#{order.id}</td>
+                  <td>{order.customer_name || "N/A"}</td>
+                  <td>{order.model_name || "N/A"}</td>
+                  <td>{order.service_type || "N/A"}</td>
+                  <td>{order.date || "N/A"}</td>
+                  <td>
+                    <span className={styles.badge}>
+                      {order.status || "Pending"}
+                    </span>
+                  </td>
+                  <td>${order.amount || "N/A"}</td>
+                  <td>
+                    <a href={`/admin/orderSingle?id=${order.id}`} title="View">
+                      🔍
+                    </a>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan="8"
+                  style={{ textAlign: "center", padding: "20px" }}
+                >
+                  No recent orders found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </section>

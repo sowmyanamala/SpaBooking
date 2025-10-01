@@ -1,0 +1,258 @@
+.ordersContainer {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.ordersTitle {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.ordersTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.thead {
+  background: #f8f9fa;
+}
+
+.th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: top;
+}
+
+.td a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.td a:hover {
+  text-decoration: underline;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.viewBtn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.viewBtn:hover {
+  background: #0056b3;
+}
+
+.statusBadge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.statusInitiated {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.statusApproved {
+  background: #d4edda;
+  color: #155724;
+}
+
+.statusDenied {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-style: italic;
+  color: #6c757d;
+}
+
+.error {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 12px;
+  border-radius: 4px;
+  margin: 20px 0;
+  border: 1px solid #f5c6cb;
+}
+
+.noOrders {
+  text-align: center;
+  padding: 40px;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Single Order Details Styles */
+.detailsContainer {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.section {
+  margin-bottom: 30px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #dee2e6;
+  padding-bottom: 5px;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.infoLabel {
+  font-weight: 600;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+.infoValue {
+  color: #333;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.statusCell {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.actionsButtons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.approveBtn,
+.denyBtn,
+.updateBtn,
+.backBtn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.approveBtn {
+  background: #28a745;
+  color: white;
+}
+
+.approveBtn:hover {
+  background: #218838;
+}
+
+.denyBtn {
+  background: #dc3545;
+  color: white;
+}
+
+.denyBtn:hover {
+  background: #c82333;
+}
+
+.updateBtn {
+  background: #007bff;
+  color: white;
+}
+
+.updateBtn:hover {
+  background: #0056b3;
+}
+
+.backBtn {
+  background: #6c757d;
+  color: white;
+}
+
+.backBtn:hover {
+  background: #545b62;
+}
+
+.statusSelect {
+  padding: 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.saving {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.errorMini {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+@media (max-width: 768px) {
+  .ordersTable {
+    font-size: 14px;
+  }
+  
+  .th,
+  .td {
+    padding: 8px 12px;
+  }
+  
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .actionsButtons {
+    flex-direction: column;
+  }
+}

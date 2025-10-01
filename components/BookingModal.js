@@ -2,7 +2,6 @@
 // import styles from '../styles/bookingModal.module.css';
 // import { useRouter } from 'next/router';
 
-
 // const BookingModal = ({ onClose, therapist, selectedDate, selectedSlot, callType }) => {
 //   const router = useRouter();
 //   console.log('BookingModal props:', {
@@ -13,7 +12,7 @@
 //   });
 
 //   console.log(therapist.picture_url);
-  
+
 //   const [step, setStep] = useState(1);
 //   const [formData, setFormData] = useState({
 //     firstName: '',
@@ -45,11 +44,10 @@
 //         date: selectedDate,
 //         time: selectedSlot,
 //         callType,
-//         price: therapist.price, 
+//         price: therapist.price,
 //       },
 //     });
 //   };
-  
 
 //   return (
 //     <div className={styles.modalOverlay}>
@@ -107,7 +105,6 @@
 // };
 // export default BookingModal;
 
-
 // File: components/BookingModal.js
 import React, { useEffect, useState } from "react";
 import styles from "../styles/bookingModal.module.css";
@@ -117,7 +114,13 @@ import { BASE_URL } from "../baseurl/Baseurl";
 import ClientLogin from "./onboarding/ClientLogin";
 import ClientReg from "./onboarding/ClientReg";
 
-const BookingModal = ({ onClose, therapist, selectedDate, selectedSlot, callType }) => {
+const BookingModal = ({
+  onClose,
+  therapist,
+  selectedDate,
+  selectedSlot,
+  callType,
+}) => {
   const router = useRouter();
 
   // UI state
@@ -173,15 +176,19 @@ const BookingModal = ({ onClose, therapist, selectedDate, selectedSlot, callType
     setClientFormData({ ...clientFormData, [field]: e.target.value });
   };
 
-  // API calls 
+  // API calls
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      const response = await axios.post(`${BASE_URL}login-customer.php`, loginData, {
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await axios.post(
+        `${BASE_URL}login-customer.php`,
+        loginData,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       if (response.data.success == "1") {
         const { token, name } = response.data;
@@ -191,7 +198,10 @@ const BookingModal = ({ onClose, therapist, selectedDate, selectedSlot, callType
         setShowAuth(false);
         handleProceedToPay();
       } else {
-        setError(response.data.message || "Email/Password do not match. Please try again!");
+        setError(
+          response.data.message ||
+            "Email/Password do not match. Please try again!"
+        );
       }
     } catch (err) {
       console.error(err);
@@ -205,9 +215,13 @@ const BookingModal = ({ onClose, therapist, selectedDate, selectedSlot, callType
     setError("");
     setLoading(true);
     try {
-      const response = await axios.post(`${BASE_URL}register-customer.php`, clientFormData, {
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await axios.post(
+        `${BASE_URL}register-customer.php`,
+        clientFormData,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       if (response.data.success == "1") {
         const { token, name } = response.data;
@@ -227,10 +241,10 @@ const BookingModal = ({ onClose, therapist, selectedDate, selectedSlot, callType
     }
   };
 
-  //  After login/signup success 
+  //  After login/signup success
   const handleProceedToPay = () => {
     router.push({
-      pathname: "/therapistDetails/ConfirmAndPayPage",
+      pathname: "/ConfirmAndPayPage",
       query: {
         name: therapist.name,
         image: therapist.picture_url || "/images/default.jpg",

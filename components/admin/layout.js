@@ -2,6 +2,7 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/router";
 import styles from "./layout.module.css";
 
 export default function AdminLayout({
@@ -9,16 +10,27 @@ export default function AdminLayout({
   breadcrumbs = [],
   children,
 }) {
+  const router = useRouter();
+  const pathname = router.pathname;
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("adminDarkMode") === "true";
+    }
+    return false;
+  });
 
   const searchRef = useRef(null);
   const notificationsRef = useRef(null);
   const userMenuRef = useRef(null);
+
+  const isActive = (path) =>
+    pathname === path ||
+    (path === "/admin/orders" && pathname === "/admin/orderSingle");
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -45,11 +57,18 @@ export default function AdminLayout({
   // Toggle dark mode class on body
   useEffect(() => {
     if (darkMode) {
-      document.body.classList.add(styles.darkMode);
+      document.body.classList.add("darkMode");
     } else {
-      document.body.classList.remove(styles.darkMode);
+      document.body.classList.remove("darkMode");
     }
   }, [darkMode]);
+
+  // Handle dark mode toggle
+  const toggleDarkMode = () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    localStorage.setItem("adminDarkMode", newDarkMode.toString());
+  };
 
   // Dummy search function with debounce
   useEffect(() => {
@@ -73,7 +92,7 @@ export default function AdminLayout({
   }, [searchTerm]);
 
   return (
-    <div className={`${styles.containerAdmin} ${darkMode ? styles.dark : ""}`}>
+    <div className={`${styles.containerAdmin} ${darkMode ? "dark" : ""}`}>
       <Head>
         <title>{title} • Admin</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -102,7 +121,7 @@ export default function AdminLayout({
             <>
               <Link href="/therapists">Therapists</Link>
               <span className={styles.sep}>/</span>
-              <Link href="/admin-backend">Dashboards</Link>
+              <Link href="/admin">Dashboards</Link>
               <span className={styles.sep}>/</span>
               <span className={styles.muted}>Home</span>
             </>
@@ -160,7 +179,7 @@ export default function AdminLayout({
         <button
           className={styles.themeToggle}
           aria-label="Toggle dark mode"
-          onClick={() => setDarkMode(!darkMode)}
+          onClick={toggleDarkMode}
         >
           {darkMode ? "🌙" : "☀️"}
         </button>
@@ -188,37 +207,23 @@ export default function AdminLayout({
           </div>
 
           <ul className={styles.menu}>
-            <li>
-              <Link href="/admin-backend">Dashboard</Link>
+            <li className={isActive("/admin") ? styles.active : ""}>
+              <Link href="/admin">Dashboard</Link>
             </li>
-            <li>
-              <Link href="#">Extra Apps</Link>
+            <li className={isActive("/admin/orders") ? styles.active : ""}>
+              <Link href="/admin/orders">Orders</Link>
             </li>
-            <li>
-              <Link href="#">Widgets</Link>
+            <li className={isActive("/admin/services") ? styles.active : ""}>
+              <Link href="/admin/services">Services</Link>
             </li>
-            <li className={styles.section}>Elements</li>
-            <li>
-              <Link href="#">Forms</Link>
+            <li className={isActive("/admin/therapists") ? styles.active : ""}>
+              <Link href="/admin/therapists">Therapists</Link>
             </li>
-            <li>
-              <Link href="#">Charts</Link>
-            </li>
-            <li>
-              <Link href="#">Tables</Link>
-            </li>
-            <li>
-              <Link href="#">Icons</Link>
-            </li>
-            <li className={styles.section}>Maps</li>
-            <li>
-              <Link href="#">Pages</Link>
-            </li>
-            <li>
-              <Link href="#">Multilevel</Link>
+            <li className={isActive("/admin/users") ? styles.active : ""}>
+              <Link href="/admin/users">Users</Link>
             </li>
             <li className={styles.logout}>
-              <Link href="/admin-backend/logout">Logout</Link>
+              <Link href="/admin/logout">Logout</Link>
             </li>
           </ul>
         </aside>

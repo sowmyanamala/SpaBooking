@@ -969,3 +969,15 @@ body{
     rgb(var(--bg));
   color: rgb(var(--text));
 }
+
+/* Dark mode overrides */
+body.darkMode{
+  --bg: 20, 20, 20;
+  --text: 240, 240, 240;
+  --muted: 160, 160, 160;
+  --card: 40, 40, 40;
+  --sidebar-bg: 20, 20, 20;
+  --sidebar-border: 255, 255, 255, .06;
+  background: #141414;
+  color: rgb(var(--text));
+}

@@ -110,7 +110,7 @@ const ModelReg = ({
 
   return (
     <>
-      <h2>Sign up / Log in as Model</h2>
+      <h2>Sign up / Log in as Therapist</h2>
 
       <div className={styles.inputGroup}>
         <input

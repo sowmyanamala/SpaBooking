@@ -1,19 +1,35 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Router from "next/router";
 
 const withAuthCustomer = (WrappedComponent) => {
-  const HOC = (props) => {
+  const AuthenticatedComponent = (props) => {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
     useEffect(() => {
-      const token = localStorage.getItem("customertoken");
-      if (!token) {
-        Router.push("/customer-backend/login");
+      // Ensure we're on the client-side before accessing localStorage
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem("customertoken");
+        if (!token) {
+          // Redirect to login if no token
+          Router.push("/customer-backend/login");
+        } else {
+          setIsAuthenticated(true);
+        }
       }
+      setIsLoading(false); // Mark loading as complete
     }, []);
 
-    return <WrappedComponent {...props} />;
+    // Show loading state while checking authentication
+    if (isLoading) {
+      return <div>Loading...</div>; // Replace with a proper loading component if available
+    }
+
+    // Only render the wrapped component if authenticated
+    return isAuthenticated ? <WrappedComponent {...props} /> : null;
   };
 
-  return HOC;
+  return AuthenticatedComponent;
 };
 
 export default withAuthCustomer;

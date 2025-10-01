@@ -43,7 +43,7 @@ function Booking() {
   return (
     <Layout>
       <Head>
-        <title> Book a model </title>
+        <title> Book a therapist </title>
       </Head>
       <div className="">
       {/* <SquareForm /> */}

@@ -12,7 +12,7 @@ const ModelLogin = ({
 }) => {
   return (
     <>
-      <h2> Login up as Model</h2>
+      <h2> Login up as a Therapist</h2>
       <div className={styles.inputGroup}>
         <label>Email </label>
         <input
@@ -37,20 +37,18 @@ const ModelLogin = ({
           Sign Up
         </button>
       </div> */}
-            <div className={styles.switchText}>
-  Don’t have an account?{" "}
-  <span className={styles.linkText} onClick={() => setRegType("signup")}>
-    Sign Up
-  </span>
-</div>
+      <div className={styles.switchText}>
+        Don’t have an account?{" "}
+        <span className={styles.linkText} onClick={() => setRegType("signup")}>
+          Sign Up
+        </span>
+      </div>
       <div className="flex">
         <button
           className={styles.continueBtn}
-          onClick={(e) => {
-            if (validateLogin()) {
-              handleLogin(e);
-            }
-          }}>
+          onClick={handleLogin}
+          type="button"
+        >
           {loading ? "please wait..." : "Log In"}
         </button>
         {loading ? <img width="30px" src="images/loading.gif" /> : " "}

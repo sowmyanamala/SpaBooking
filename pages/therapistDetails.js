@@ -148,12 +148,47 @@ export default function TherapistDetails() {
     };
   };
 
+  // Helper to decode JWT and extract customer ID
+  const getCustomerIdFromToken = () => {
+    const token = localStorage.getItem("customertoken");
+    if (!token) return null;
+
+    // If token is a simple numeric ID, return it directly
+    if (/^\d+$/.test(token)) {
+      return token;
+    }
+
+    // Otherwise, try to decode as JWT
+    try {
+      const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+      const json = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      const payload = JSON.parse(json);
+      return payload?.id || payload?.userId || payload?.customer_id || null;
+    } catch {
+      // If JWT decode fails, return the token itself if it looks like a number
+      return /^\d+$/.test(token) ? token : null;
+    }
+  };
+
   // Create booking against API
   const createBooking = async () => {
-    const customerId = localStorage.getItem("customertoken");
+    const customerToken = localStorage.getItem("customertoken");
+
+    if (!customerToken) {
+      setSaveError("Please log in to make a booking.");
+      return;
+    }
+
+    // Extract customer ID from JWT token
+    const customerId = getCustomerIdFromToken();
 
     if (!customerId) {
-      setSaveError("Please log in to make a booking.");
+      setSaveError("Unable to identify customer. Please log in again.");
       return;
     }
 

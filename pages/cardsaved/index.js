@@ -43,14 +43,14 @@ function Booking() {
   return (
     <Layout>
       <Head>
-        <title> Book a model </title>
+        <title> Book a therapist </title>
       </Head>
       <div className="">
       {/* <SquareForm /> */}
        
             <div className='success'> 
                 <h1> Thanks! Your request is being processed. </h1>
-                <h2> Your proposal will be approved if the model accept the request.  </h2>
+                <h2> Your proposal will be approved if the therapist accept the request.  </h2>
             </div>
             
         </div>

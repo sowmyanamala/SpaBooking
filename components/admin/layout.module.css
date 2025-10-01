@@ -54,6 +54,111 @@
 
 .footer{padding:20px;opacity:.6;}
 
+/* Dark mode toggle button */
+.themeToggle{
+  height:36px;
+  width:36px;
+  border-radius:10px;
+  border:1px solid rgba(0,0,0,.08);
+  background:white;
+  cursor:pointer;
+  font-size:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* Dark mode styles - using global darkMode class */
+:global(.darkMode) .topbar{
+  background:rgba(20,20,20,.85);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+:global(.darkMode) .hamburger,
+:global(.darkMode) .iconBtn,
+:global(.darkMode) .themeToggle{
+  background:#2a2a2a;
+  border-color:rgba(255,255,255,.08);
+  color:#fff;
+}
+
+:global(.darkMode) .search{
+  background:#2a2a2a;
+  border-color:rgba(255,255,255,.08);
+  color:#fff;
+}
+
+:global(.darkMode) .search::placeholder{
+  color:rgba(255,255,255,.6);
+}
+
+:global(.darkMode) .sidebar{
+  background:#1a1a1a;
+  color:#e0e0e0;
+}
+
+:global(.darkMode) .brand{
+  border-bottom-color:rgba(255,255,255,.06);
+}
+
+:global(.darkMode) .menu li a{
+  color:#e0e0e0;
+}
+
+:global(.darkMode) .menu li a:hover{
+  background:rgba(255,255,255,.08);
+  border-color:rgba(255,255,255,.12);
+}
+
+:global(.darkMode) .section{
+  color:#b0b0b0;
+}
+
+:global(.darkMode) .card,
+:global(.darkMode) .widget,
+:global(.darkMode) .tableWrap{
+  background:#2a2a2a;
+  border:1px solid rgba(255,255,255,.06);
+}
+
+:global(.darkMode) .table thead th{
+  background:#1a1a1a;
+  color:#b0b0b0;
+  border-bottom-color:rgba(255,255,255,.06);
+}
+
+:global(.darkMode) .table tbody td{
+  border-bottom-color:rgba(255,255,255,.04);
+  color:#e0e0e0;
+}
+
+:global(.darkMode) .badge{
+  background:rgba(255,96,128,.15);
+  border-color:rgba(255,96,128,.3);
+  color:#ff6080;
+}
+
+:global(.darkMode) .crumbs{
+  background:rgba(255,96,128,.08);
+  color:#b0b0b0;
+}
+
+:global(.darkMode) .crumbs a{
+  color:#e0e0e0;
+}
+
+:global(.darkMode) .crumbs a:hover{
+  color:#ff6080;
+}
+
+:global(.darkMode) .sep{
+  color:#b0b0b0;
+}
+
+:global(.darkMode) .muted{
+  color:#b0b0b0;
+}
+
 
 /* Responsive */
 @media (max-width: 1100px){.cards{grid-template-columns:repeat(2,1fr);} .widgets{grid-template-columns:1fr;}}

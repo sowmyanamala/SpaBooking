@@ -131,7 +131,7 @@ function Models({ photoOnlyView, apiUrl }) {
           />
         ))}
       {data && !loading && data.length < 1
-        ? " No Model matched your searched criteria.  "
+        ? " No Therapist matched your searched criteria.  "
         : ""}
     </div>
   );

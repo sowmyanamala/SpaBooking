@@ -20,6 +20,19 @@ export default function Home() {
   });
   const [searchName, setSearchName] = useState("");
 
+  // Check if user was redirected here due to auth issues
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const authRedirect = urlParams.get("auth_redirect");
+    if (authRedirect === "model") {
+      // Auto-show model login modal with small delay to ensure layout is ready
+      setTimeout(() => {
+        const event = new CustomEvent("showModelLoginModal");
+        window.dispatchEvent(event);
+      }, 100);
+    }
+  }, []);
+
   // fetch whenever URL changes
   useEffect(() => {
     fetch(filteredUrl)
@@ -213,26 +226,30 @@ export default function Home() {
         </p>
       ) : (
         <section className={styles.grid}>
-          {therapists.map((t, i) => (
-            <div
-              key={i}
-              className={styles.card}
-              onClick={() => {
-                localStorage.setItem("selectedTherapist", JSON.stringify(t));
-                window.location.href = "/therapistDetails";
-              }}
-            >
-              <img
-                src={t.picture_url || "/images/default.jpg"}
-                alt={t.name}
-                className={styles.image}
-              />
-              <div className={styles.cardOverlay}>
-                <h3>{t.name}</h3>
-                <p>{t.service_area_primary || t.service_area}</p>
+          {therapists
+            .filter((t) => t.name && t.name.trim() !== "") // Filter out therapists with empty names
+            .map((t, i) => (
+              <div
+                key={i}
+                className={styles.card}
+                onClick={() => {
+                  localStorage.setItem("selectedTherapist", JSON.stringify(t));
+                  window.location.href = "/therapistDetails";
+                }}
+              >
+                <img
+                  src={t.picture_url || "/images/model.jpeg"}
+                  alt={t.name || "Therapist"}
+                  className={styles.image}
+                />
+                <div className={styles.cardOverlay}>
+                  <h3>{t.name || "Unknown Therapist"}</h3>
+                  <p>
+                    {t.service_area_primary || t.service_area || "Service Area"}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </section>
       )}
     </Layout>
