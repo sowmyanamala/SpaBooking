@@ -1,4 +1,4 @@
-import styles from "../../styles/LoginModal.module.css";
+import styles from "../../styles/loginModal.module.css";
 
 const ClientRegStep3 = ({
   handleChange,

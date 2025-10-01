@@ -1,6 +1,6 @@
 // pages/components/LoginModal.js
 import { useMemo, useState } from "react";
-import styles from "../styles/LoginModal.module.css";
+import styles from "../styles/loginModal.module.css";
 import { BASE_URL } from "../baseurl/Baseurl";
 import axios from "axios";
 import Router from "next/router";

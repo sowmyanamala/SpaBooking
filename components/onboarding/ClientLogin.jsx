@@ -1,5 +1,5 @@
 import { useState } from "react";
-import styles from "../../styles/LoginModal.module.css";
+import styles from "../../styles/loginModal.module.css";
 import { Eye, EyeOff } from "lucide-react";
 
 const ClientLogin = ({

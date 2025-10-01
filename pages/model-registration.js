@@ -2,7 +2,6 @@
 import { useState } from "react";
 import Head from "next/head";
 import Layout from "../components/layout";
-import styles from "../styles/LoginModal.module.css";
 import { BASE_URL } from "../baseurl/Baseurl";
 import axios from "axios";
 import Router from "next/router";
