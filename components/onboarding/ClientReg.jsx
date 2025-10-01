@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import styles from "../../styles/LoginModal.module.css";
+import styles from "../../styles/loginModal.module.css";
 import { Eye, EyeOff } from "lucide-react";
 
 const usPhoneRegex = /^(\+1\s?)?(\d{3}|\(\d{3}\))[-.\s]?\d{3}[-.\s]?\d{4}$/;

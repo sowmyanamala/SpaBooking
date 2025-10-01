@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import CustomerReview from '../../components/customerReview';
+// import CustomerReview from '../../components/customerReview';
 import modelStyle from '../../styles/model.module.css';
 import axios from 'axios';
 
@@ -47,19 +47,19 @@ function ReviewSingle({ reviewData }) {
   );
 }
 
-function ReviewSingle() {
+// function ReviewSingle() {
 
-  return (
-    <tr>
-      <td>
-        <form>
-          {/* Form content would go here */}
-        </form>
-      </td>
-      <td>Provide Review to Andrea Sherri Parton</td>
-    </tr>
-  );
-}
+//   return (
+//     <tr>
+//       <td>
+//         <form>
+//           {/* Form content would go here */}
+//         </form>
+//       </td>
+//       <td>Provide Review to Andrea Sherri Parton</td>
+//     </tr>
+//   );
+// }
 
 export default ReviewSingle;
 
