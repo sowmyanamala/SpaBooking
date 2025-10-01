@@ -145,3 +145,50 @@
 .backToHome {
   margin: 3rem 0 0;
 }
+
+/* Dark mode styles for model layout */
+:global(.darkMode) .container {
+  background: #141414;
+  color: #e0e0e0;
+}
+
+:global(.darkMode) .header {
+  background: #1a1a1a;
+  border-bottom-color: #333;
+}
+
+:global(.darkMode) .navList li a {
+  color: #e0e0e0;
+}
+
+:global(.darkMode) .navList li a:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+:global(.darkMode) .navList li a.active {
+  background-color: #ff6080;
+  color: #fff;
+}
+
+:global(.darkMode) .logoutLink {
+  color: #ff6080;
+}
+
+:global(.darkMode) .logoutLink:hover {
+  background-color: #2a1a1a;
+}
+
+:global(.darkMode) .adminMenu {
+  background-color: #2a1a1a;
+  border-right-color: #444;
+}
+
+:global(.darkMode) .adminMenu a {
+  color: #e0e0e0;
+}
+
+:global(.darkMode) .adminMenu a:hover {
+  background-color: #ff6080;
+  color: #fff;
+}

@@ -81,7 +81,7 @@ export default function ConfirmAndPayPage() {
           />
 
           <p>
-            <strong>Model:</strong> {name}
+            <strong>Therapist:</strong> {name}
           </p>
           <p>
             <strong>Date:</strong> {date}

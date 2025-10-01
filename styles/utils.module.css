@@ -128,11 +128,90 @@
   
 }
 
+/* Dashboard Styles */
+.dashboard {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.filters {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  border: 1px solid #e9ecef;
+}
+
+.filters h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.filterRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.filterGroup label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.filterGroup input,
+.filterGroup select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.filterGroup input:focus,
+.filterGroup select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.filterButton {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.filterButton:hover {
+  background: #0056b3;
+}
+
+.modelsSection {
+  margin-top: 20px;
+}
+
+.modelsSection h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
 @media only screen and (max-width: 400px) {
   .headingMd{ font-size: 16px; }
   .filterLabel{padding: 2px;}
   .model{ width: 140px; }
-
-
+  .filterRow {
+    grid-template-columns: 1fr;
+  }
 }
 

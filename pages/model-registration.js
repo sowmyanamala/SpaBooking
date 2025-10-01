@@ -1,157 +1,138 @@
 // pages/model-registration.js
-import React, { useState } from "react";
+import { useState } from "react";
 import Head from "next/head";
 import Layout from "../components/layout";
+import styles from "../styles/LoginModal.module.css";
+import { BASE_URL } from "../baseurl/Baseurl";
 import axios from "axios";
 import Router from "next/router";
-import { CURRENT_URL } from "../components/config";
+import ModelLogin from "../components/onboarding/ModelLogin";
+import ModelReg from "../components/onboarding/ModelReg";
 
-const API_CREATE = "https://tsm.spagram.com/api/create-model.php";
-const API_LOGIN = "https://tsm.spagram.com/api/login-model.php";
+// Helper: decode JWT payload safely
+function parseJwt(token) {
+  try {
+    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const json = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
 
 export default function ModelRegistration() {
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
+  const [regType, setRegType] = useState("login");
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
     password: "",
-    gender: "",
-    ethnicity: "",
-    age: "", // added
-    height: "",
-    color: "",
-    about: "",
-    service_area: "",
-    image: "", // base64 data URL
+    image: "",
   });
+  const [errors, setErrors] = useState({});
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const [serviceRows, setServiceRows] = useState([{ service: "", price: "" }]);
-
-  const onChange = (e) =>
-    setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
-  const onLoginChange = (e) =>
-    setLoginData((p) => ({ ...p, [e.target.name]: e.target.value }));
-
-  // Light client-side compression to keep payloads small (<~1–2MB)
-  const fileToDataURL = (file, maxW = 1200, quality = 0.75) =>
-    new Promise((resolve, reject) => {
-      const img = new Image();
-      const fr = new FileReader();
-      fr.onload = () => {
-        img.src = fr.result;
-      };
-      fr.onerror = reject;
-      img.onload = () => {
-        const scale = Math.min(1, maxW / img.width || 1);
-        const w = Math.round(img.width * scale);
-        const h = Math.round(img.height * scale);
-        const cvs = document.createElement("canvas");
-        cvs.width = w;
-        cvs.height = h;
-        cvs.getContext("2d").drawImage(img, 0, 0, w, h);
-        // export as JPEG to shrink further
-        resolve(cvs.toDataURL("image/jpeg", quality));
-      };
-      fr.readAsDataURL(file);
-    });
-
-  const onImageChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/"))
-      return setError("Please choose an image file.");
-    try {
-      setError("");
-      const dataUrl = await fileToDataURL(file, 1200, 0.75);
-      setFormData((p) => ({ ...p, image: dataUrl }));
-    } catch {
-      setError("Could not read image.");
-    }
+  // Validation functions
+  const validateLogin = () => {
+    const e = {};
+    if (!loginData.email) e.email = "required";
+    if (!loginData.password) e.password = "required";
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  const addRow = () =>
-    setServiceRows((r) => [...r, { service: "", price: "" }]);
-  const updateRow = (i, field, val) =>
-    setServiceRows((rows) =>
-      rows.map((r, idx) => (idx === i ? { ...r, [field]: val } : r))
-    );
-  const removeRow = (i) =>
-    setServiceRows((rows) => rows.filter((_, idx) => idx !== i));
-
-  const handleRegistration = async (e) => {
-    e.preventDefault();
-    setError("");
-    setMessage("");
-    if (!formData.image) return setError("Please upload a profile image.");
-
-    try {
-      setLoading(true);
-
-      const payload = {
-        name: formData.name,
-        phone: formData.phone.replace(/\D+/g, ""),
-        email: formData.email,
-        password: formData.password,
-        gender: formData.gender,
-        height: formData.height,
-        color: formData.color,
-        about: formData.about,
-        service_area: formData.service_area,
-        image: formData.image,
-        // send only filled services
-        servicePrices:
-          JSON.stringify(
-            serviceRows
-              .map((r) => ({
-                service: r.service.trim(),
-                price: r.price.trim(),
-              }))
-              .filter((r) => r.service && r.price)
-          ) || "[]",
-      };
-
-      const res = await axios.post(API_CREATE, payload, {
-        headers: { "Content-Type": "application/json" },
-      });
-
-      const ok =
-        typeof res.data === "string"
-          ? res.data.includes("Therapist created") ||
-            res.data.includes("Data inserted successfully")
-          : res.data?.success === "1";
-
-      if (!ok) throw new Error(res.data?.message || "Registration failed");
-
-      setMessage("Registration successful.");
-      Router.push(`${CURRENT_URL}model-backend/profile?source=registration`);
-    } catch (err) {
-      setError(
-        err?.response?.data?.message || err.message || "Something went wrong"
-      );
-    } finally {
-      setLoading(false);
-    }
+  const validateModel = () => {
+    const e = {};
+    if (!formData.phone) e.phone = "required";
+    if (!formData.name) e.name = "required";
+    if (!formData.email) e.email = "required";
+    if (!formData.password) e.password = "required";
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
+  // Change handlers
+  const handleChange = (field) => (e) =>
+    setFormData({ ...formData, [field]: e.target.value });
+
+  const handleLoginChange = (field) => (e) =>
+    setLoginData({ ...loginData, [field]: e.target.value });
+
+  // Handle login
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (!validateLogin()) return;
+
     setError("");
-    setMessage("");
-    if (!loginData.email || !loginData.password)
-      return setError("Please enter both email and password.");
+    setLoading(true);
+
     try {
-      const res = await axios.post(API_LOGIN, loginData);
-      if (res.data?.success === "1") {
-        localStorage.setItem("token", res.data.token);
-        Router.push(`${CURRENT_URL}model-backend/orders`);
-      } else setError("Email/Password do not match. Please try again!");
-    } catch {
-      setError("Login failed");
+      const url = `${BASE_URL}login-model.php`;
+      const res = await axios.post(url, loginData);
+
+      console.log("Login API Response:", res.data);
+      console.log("Success value:", res.data?.success);
+      console.log("Success type:", typeof res.data?.success);
+
+      if (res.data?.success === "1" || res.data?.success === 1) {
+        // API can return either 'token' or 'usertoken'
+        const token = res.data.usertoken || res.data.token;
+        const { name, id } = res.data;
+
+        console.log("Login successful!");
+        console.log("Token:", token);
+        console.log("Name:", name);
+        console.log("ID:", id);
+
+        // Save auth data
+        localStorage.setItem("token", token);
+        localStorage.setItem("modelName", name || "");
+
+        // Verify token was saved
+        const savedToken = localStorage.getItem("token");
+        console.log("Saved token:", savedToken);
+        console.log("Token saved successfully:", savedToken === token);
+
+        // Store modelId from API or decode from token
+        // If token is numeric, use it as modelId; otherwise try to decode JWT
+        let modelId = id;
+        if (!modelId && /^\d+$/.test(token)) {
+          modelId = token;
+        } else if (!modelId) {
+          const payload = parseJwt(token);
+          console.log("Parsed JWT payload:", payload);
+          modelId = payload?.id ?? payload?.userId ?? null;
+        }
+        console.log("Model ID:", modelId);
+
+        if (modelId != null) {
+          localStorage.setItem("modelId", String(modelId));
+        }
+
+        // Use window.location.href for a hard redirect to ensure the page reloads
+        // and withAuth can properly detect the token
+        console.log("Redirecting to model-backend/orders...");
+        setTimeout(() => {
+          window.location.href = "/model-backend/orders";
+        }, 200);
+      } else {
+        console.log("Login failed - API returned success != 1");
+        setError(
+          res.data?.message || "Email/Password do not match. Please try again!"
+        );
+      }
+    } catch (e) {
+      console.error("Login error:", e);
+      setError("An error occurred during login. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -162,229 +143,47 @@ export default function ModelRegistration() {
       </Head>
 
       <div
-        className="registration-page"
-        style={{ display: "grid", gap: 24, gridTemplateColumns: "1fr 1fr" }}
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "80vh",
+          padding: "2rem",
+        }}
       >
-        {/* Login */}
         <div
-          className="login-cnt"
-          style={{ background: "#fff", padding: 16, borderRadius: 12 }}
+          style={{
+            background: "white",
+            borderRadius: "16px",
+            padding: "2rem",
+            maxWidth: "420px",
+            width: "100%",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+          }}
         >
-          <h2>Login as a Therapist</h2>
-          <form onSubmit={handleLogin} style={{ display: "grid", gap: 12 }}>
-            <label>
-              <div>Email:</div>
-              <input
-                type="email"
-                name="email"
-                value={loginData.email}
-                onChange={onLoginChange}
-                required
-              />
-            </label>
-            <label>
-              <div>Password:</div>
-              <input
-                type="password"
-                name="password"
-                value={loginData.password}
-                onChange={onLoginChange}
-                required
-              />
-            </label>
-            <button className="button" type="submit">
-              Submit
-            </button>
-            {message && <p className="message">{message}</p>}
-          </form>
-          {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
-        </div>
-
-        {/* Registration */}
-        <div
-          className="registration-container"
-          style={{ background: "#fff", padding: 16, borderRadius: 12 }}
-        >
-          <h2>Fill the form to register as a Therapist</h2>
-          <form
-            onSubmit={handleRegistration}
-            style={{ display: "grid", gap: 12 }}
-          >
-            <label>
-              <div>Name:</div>
-              <input
-                name="name"
-                value={formData.name}
-                onChange={onChange}
-                required
-              />
-            </label>
-            <label>
-              <div>Phone:</div>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={onChange}
-                required
-              />
-            </label>
-            <label>
-              <div>Email:</div>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={onChange}
-                required
-              />
-            </label>
-            <label>
-              <div>Password:</div>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={onChange}
-                required
-              />
-            </label>
-            <label>
-              <div>Gender:</div>
-              <select
-                name="gender"
-                value={formData.gender}
-                onChange={onChange}
-                required
-              >
-                <option value="">Select…</option>
-                <option>Female</option>
-                <option>Male</option>
-                <option>Non-binary</option>
-                <option>Prefer not to say</option>
-              </select>
-            </label>
-
-            {/* Optional but recommended to send */}
-            <label>
-              <div>Ethnicity (optional):</div>
-              <input
-                name="ethnicity"
-                value={formData.ethnicity}
-                onChange={onChange}
-              />
-            </label>
-            <label>
-              <div>Age (optional):</div>
-              <input
-                name="age"
-                inputMode="numeric"
-                value={formData.age}
-                onChange={onChange}
-              />
-            </label>
-
-            <label>
-              <div>Height:</div>
-              <input
-                name="height"
-                value={formData.height}
-                onChange={onChange}
-                placeholder={`e.g., 5'6" or 168cm`}
-              />
-            </label>
-
-            <label>
-              <div>Color:</div>
-              <input
-                name="color"
-                value={formData.color}
-                onChange={onChange}
-                placeholder="Hair/eye/skin tone"
-              />
-            </label>
-
-            <label>
-              <div>About:</div>
-              <textarea
-                name="about"
-                rows={3}
-                value={formData.about}
-                onChange={onChange}
-              />
-            </label>
-
-            <label>
-              <div>Service Area:</div>
-              <input
-                name="service_area"
-                value={formData.service_area}
-                onChange={onChange}
-                placeholder="e.g., Manhattan"
-              />
-            </label>
-
-            <fieldset style={{ border: 0, padding: 0 }}>
-              <legend>Services & Prices</legend>
-              {serviceRows.map((r, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 120px auto",
-                    gap: 8,
-                    marginBottom: 8,
-                  }}
-                >
-                  <input
-                    placeholder="Service (e.g., Swedish 60m)"
-                    value={r.service}
-                    onChange={(e) => updateRow(i, "service", e.target.value)}
-                  />
-                  <input
-                    placeholder="Price"
-                    value={r.price}
-                    onChange={(e) => updateRow(i, "price", e.target.value)}
-                  />
-                  <button type="button" onClick={() => removeRow(i)}>
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <button type="button" onClick={addRow}>
-                Add service
-              </button>
-            </fieldset>
-
-            <label>
-              <div>Profile Image:</div>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={onImageChange}
-                required
-              />
-            </label>
-
-            <div
-              className="submitbox"
-              style={{ display: "flex", alignItems: "center", gap: 12 }}
-            >
-              <button className="button" type="submit" disabled={loading}>
-                {loading ? "Submitting…" : "Submit"}
-              </button>
-              {loading ? (
-                <img width="30" src="/images/loading.gif" alt="loading" />
-              ) : null}
-            </div>
-
-            {message && <p className="message">{message}</p>}
-            {error && (
-              <p className="error" style={{ color: "#b91c1c" }}>
-                {error}
-              </p>
-            )}
-          </form>
+          {regType === "login" ? (
+            <ModelLogin
+              handleLoginChange={handleLoginChange}
+              loginData={loginData}
+              errors={errors}
+              error={error}
+              validateLogin={validateLogin}
+              setRegType={setRegType}
+              loading={loading}
+              handleLogin={handleLogin}
+            />
+          ) : (
+            <ModelReg
+              handleChange={handleChange}
+              setRegType={setRegType}
+              validateModel={validateModel}
+              formData={formData}
+              setFormData={setFormData}
+              errors={errors}
+              error={error}
+              loading={loading}
+            />
+          )}
         </div>
       </div>
     </Layout>

@@ -1,0 +1,218 @@
+/* Help Center Styles */
+.helpContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.helpHeader {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2rem 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.helpTitle {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.helpSubtitle {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.section {
+  margin-bottom: 3rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.sectionHeader {
+  font-size: 1.8rem;
+  margin: 0;
+  padding: 1.5rem 2rem;
+  color: #333;
+  border-bottom: 3px solid transparent;
+  font-weight: 600;
+}
+
+.sectionContent {
+  padding: 2rem;
+}
+
+.faqItem {
+  background: #f8f9fa;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #007bff;
+  transition: all 0.3s ease;
+}
+
+.faqItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.faqQuestion {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: #333;
+}
+
+.faqAnswer {
+  margin: 0;
+  line-height: 1.6;
+  color: #555;
+}
+
+.contactSection {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  text-align: center;
+}
+
+.contactTitle {
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.contactText {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2rem;
+}
+
+.contactButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.contactButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.contactButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.emailButton {
+  background: white;
+  color: #f5576c;
+}
+
+.externalButton {
+  background: white;
+  color: #f5576c;
+}
+
+.externalButton:hover {
+  background: white;
+  color: #f5576c;
+}
+
+.quickLinksGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.quickLink {
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-decoration: none;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.quickLink:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.findTherapists {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.browseServices {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.bookNow {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.joinTherapist {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .helpContainer {
+    padding: 1rem;
+  }
+
+  .helpTitle {
+    font-size: 2rem;
+  }
+
+  .helpSubtitle {
+    font-size: 1rem;
+  }
+
+  .sectionHeader {
+    font-size: 1.5rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .sectionContent {
+    padding: 1.5rem;
+  }
+
+  .contactButtons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .quickLinksGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .helpHeader {
+    margin: -2rem -1rem 2rem -1rem;
+    border-radius: 0;
+  }
+
+  .helpTitle {
+    font-size: 1.8rem;
+  }
+
+  .faqItem {
+    padding: 1rem;
+  }
+
+  .faqQuestion {
+    font-size: 1.1rem;
+  }
+}

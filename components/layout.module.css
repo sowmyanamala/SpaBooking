@@ -171,4 +171,46 @@
     background-color: #f5f5f5;
     border-radius: 8px;
   }
+
+  /* Dark mode styles for main layout */
+  :global(.darkMode) .header {
+    background-color: #1a1a1a;
+    border-bottom-color: #333;
+  }
+
+  :global(.darkMode) .brand {
+    color: #ff6080;
+  }
+
+  :global(.darkMode) .navLinks a {
+    color: #e0e0e0;
+  }
+
+  :global(.darkMode) .navLinks a:hover::after {
+    background: #ff6080;
+  }
+
+  :global(.darkMode) .menuIcon .bar {
+    background-color: #e0e0e0;
+  }
+
+  :global(.darkMode) .dropdownMenu {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  :global(.darkMode) .dropdownButton {
+    color: #e0e0e0;
+  }
+
+  :global(.darkMode) .dropdownButton:hover {
+    background-color: #333;
+  }
+
+  :global(.darkMode) .footer {
+    background-color: #1a1a1a;
+    border-top-color: #333;
+    color: #b0b0b0;
+  }
   

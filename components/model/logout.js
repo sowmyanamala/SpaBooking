@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 
 const Logout = () => {
   useEffect(() => {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     // redirect to login page
-    window.location.href = '/';
+    window.location.href = "/";
   }, []);
 
   return <div>Logging out...</div>;

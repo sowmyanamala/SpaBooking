@@ -1,6 +1,4 @@
-import { useState } from "react";
 import styles from "../../styles/LoginModal.module.css";
-import { Eye, EyeOff } from "lucide-react";
 
 const ModelLogin = ({
   handleLoginChange,
@@ -12,10 +10,9 @@ const ModelLogin = ({
   loading,
   handleLogin,
 }) => {
-  const [hide, setHide] = useState(false);
   return (
     <>
-      <h2> Login up as Therapist</h2>
+      <h2> Login up as a Therapist</h2>
       <div className={styles.inputGroup}>
         <label>Email </label>
         <input
@@ -25,32 +22,13 @@ const ModelLogin = ({
           onChange={handleLoginChange("email")}
         />
         {errors.email && <p className={"required"}>{errors.email}</p>}
-        <div className="password-div">
-          <input
-            type={hide ? "text" : "password"}
-            placeholder="Password"
-            value={loginData.password}
-            onChange={handleLoginChange("password")}
-          />
-          {errors.password && <p className={"required"}>{errors.password}</p>}
-          {hide && (
-            <Eye
-              onClick={() => {
-                setHide(false);
-              }}
-              className="eye-m"
-            />
-          )}
-          {!hide && (
-            <EyeOff
-              onClick={() => {
-                setHide(true);
-              }}
-              className="eye-m"
-            />
-          )}
-        </div>
-        {!!errors?.password && <p className="required-p">{errors.password}</p>}
+        <input
+          type="password"
+          placeholder="Password"
+          value={loginData.password}
+          onChange={handleLoginChange("password")}
+        />
+        {errors.password && <p className={"required"}>{errors.password}</p>}
       </div>
       {error && <p className="required">{error}</p>}
       {/* <div className="container">
@@ -68,11 +46,9 @@ const ModelLogin = ({
       <div className="flex">
         <button
           className={styles.continueBtn}
-          onClick={(e) => {
-            if (validateLogin()) {
-              handleLogin(e);
-            }
-          }}>
+          onClick={handleLogin}
+          type="button"
+        >
           {loading ? "please wait..." : "Log In"}
         </button>
         {loading ? <img width="30px" src="images/loading.gif" /> : " "}

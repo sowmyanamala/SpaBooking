@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import Layout, { siteTitle } from "../../components/model/layout";
 import { CURRENT_URL } from "../../components/config";
-import withAuth from "../../components/admin/withAuth";
+import withAuth from "../../components/model/withAuth";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import modelCss from "../../styles/model.module.css";
@@ -50,8 +50,10 @@ const Availability = () => {
   const [excludespecificdate, setExcludespecificdate] = useState(null);
   const [message, setMessage] = useState("");
   const [unavailMessage, setUnavailMessage] = useState("");
+  const [availabilityMessage, setAvailabilityMessage] = useState("");
 
   const [error, setError] = useState(null);
+  const [authError, setAuthError] = useState(false);
   let handleColor = (time) => {
     return time.getHours() > 12 ? "text-success" : "text-error";
   };
@@ -210,7 +212,9 @@ const Availability = () => {
   const removeTime = (id, e) => {
     setAvailArr(availArr.filter((time) => time.id !== id));
     setIsUpdate(true);
-    setId(121211122);
+    // Use actual model ID from localStorage instead of hardcoded value
+    const modelid = localStorage.getItem("token");
+    setId(modelid);
   };
   const addTime = () => {
     let id = uuid();
@@ -222,34 +226,95 @@ const Availability = () => {
 
   const handleAvaiability = async (e) => {
     if (e !== undefined) e.preventDefault();
+
+    // Check authentication first
+    const modelid = localStorage.getItem("token");
+    if (!modelid || modelid === "undefined" || modelid === "null") {
+      setAvailabilityMessage("Authentication error. Please log in again.");
+      setAuthError(true);
+      return;
+    }
+
+    // Validate availability data
+    if (!availArr || availArr.length === 0) {
+      setAvailabilityMessage(
+        "Please add at least one time slot before saving."
+      );
+      return;
+    }
+
     try {
       setLoading(true);
-      const modelid = localStorage.getItem("token");
+      setError(null);
+      setAuthError(false);
+      setAvailabilityMessage("Saving availability...");
+
       formData.modelId = modelid;
       formData.availability = JSON.stringify(availArr);
+
+      console.log("Sending availability data:", formData);
+
       const response = await axios.post(
         "https://tsm.spagram.com/api/update-model-time.php",
         formData
       );
-      console.log("rest from php", response.data);
+      console.log("Response from API:", response.data);
       setLoading(false);
 
       if (response.data == "1") {
+        setAvailabilityMessage("Availability updated successfully!");
         console.log("updated the time");
-        // window.location.href = location.state ? location.state.from.pathname : '/';
+        // Clear message after 3 seconds
+        setTimeout(() => setAvailabilityMessage(""), 3000);
+      } else {
+        setAvailabilityMessage(
+          "Failed to update availability. Server returned: " + response.data
+        );
+        setError("Failed to update availability. Please try again.");
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error updating availability:", error);
+      setLoading(false);
+
+      if (error.response) {
+        // Server responded with error status
+        setAvailabilityMessage(
+          `Server error (${error.response.status}): ${error.response.statusText}`
+        );
+      } else if (error.request) {
+        // Request was made but no response received
+        setAvailabilityMessage("Network error. Please check your connection.");
+      } else {
+        // Something else happened
+        setAvailabilityMessage(
+          "Error updating availability. Please try again."
+        );
+      }
+      setError("Error updating availability. Please try again.");
     }
     setIsUpdate(false);
   };
 
+  const handleAddTimeSlot = (e) => {
+    e.preventDefault(); // Prevent form submission
+    addTime();
+    setAvailabilityMessage("Time slot added successfully!");
+    setTimeout(() => setAvailabilityMessage(""), 2000);
+  };
+
   const saveUnavailablity = async (e) => {
     e.preventDefault();
+
+    // Check authentication first
+    const modelid = localStorage.getItem("token");
+    if (!modelid || modelid === "undefined" || modelid === "null") {
+      setUnavailMessage("Authentication error. Please log in again.");
+      return;
+    }
+
     try {
       console.log("weeklydata", unavailable);
       setUnavailMessage("Saving.....");
-      const modelid = localStorage.getItem("token");
       unavailSubmitData.modelId = modelid;
       unavailSubmitData.availability = JSON.stringify(unavailable);
       console.log("to send unavail", unavailSubmitData);
@@ -259,23 +324,35 @@ const Availability = () => {
       );
       console.log("rest", response.data);
       if (response.data == "1") {
-        setUnavailMessage(" Uncertain unavailability saved.");
+        setUnavailMessage("Uncertain unavailability saved.");
+        setTimeout(() => setUnavailMessage(""), 3000);
       } else {
+        setUnavailMessage(
+          "Failed to save uncertain unavailability. Please contact admin."
+        );
         setError(
-          "Uncertain unavailability could not saved. Please contact admin"
+          "Uncertain unavailability could not be saved. Please contact admin"
         );
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error saving unavailability:", error);
+      setUnavailMessage("Error saving unavailability. Please try again.");
     }
   };
 
   const saveWeeklyData = async (e) => {
     e.preventDefault();
+
+    // Check authentication first
+    const modelid = localStorage.getItem("token");
+    if (!modelid || modelid === "undefined" || modelid === "null") {
+      setMessage("Authentication error. Please log in again.");
+      return;
+    }
+
     try {
       console.log("weeklydata", weeeklyAvailData);
       setMessage("Saving.....");
-      const modelid = localStorage.getItem("token");
       formDataWeekSubmit.modelId = modelid;
       formDataWeekSubmit.availability = JSON.stringify(weeeklyAvailData);
       const response = await axios.post(
@@ -285,11 +362,14 @@ const Availability = () => {
       console.log("rest", response.data);
       if (response.data == "1") {
         setMessage("Weekly changes are successfully saved.");
+        setTimeout(() => setMessage(""), 3000);
       } else {
-        setError("Email/Password do not match. Please try again!");
+        setMessage("Failed to save weekly availability. Please try again.");
+        setError("Failed to save weekly availability. Please try again!");
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error saving weekly data:", error);
+      setMessage("Error saving weekly availability. Please try again.");
     }
   };
 
@@ -300,38 +380,58 @@ const Availability = () => {
 
   useEffect(() => {
     const modelid = localStorage.getItem("token");
+    console.log("Current token value:", modelid);
+    console.log("Token type:", typeof modelid);
+    console.log("Token length:", modelid ? modelid.length : 0);
+
+    // Check if token exists and is valid
+    if (!modelid || modelid === "undefined" || modelid === "null") {
+      console.log("Token validation failed:", {
+        modelid,
+        isUndefined: modelid === "undefined",
+        isNull: modelid === "null",
+      });
+      setAuthError(true);
+      setError("Authentication required. Please log in again.");
+      setLoading(false);
+      return;
+    }
+
     setExcludespecificdate("2024-02-19");
     setId(modelid);
-    let url =
-      "https://tsm.spagram.com/api/single-model.php?id=" +
-      localStorage.getItem("token");
+    let url = "https://tsm.spagram.com/api/single-model.php?id=" + modelid;
 
     const getData = async (id) => {
       try {
         setLoading(true);
+        setAuthError(false);
+        console.log("Fetching data from:", url);
         const response = await axios.get(url);
         const result = response.data;
-        // setModel({...model, phone: '89999'})
 
-        // setModel({availability: result.availability })
-        console.log("received data", result);
-        if (result.availability != null) {
-          setAvailArr(result.availability);
-          console.log("hello", result.availableweekly, result.unavailable);
-        }
-        if (result.availableweekly != null) {
-          setWeeeklyAvailData(result.availableweekly);
-        }
-        if (result.unavailable != null) {
-          setunavailable(result.unavailable);
+        console.log("received data", url, result);
+
+        // Check if we got valid data back
+        if (result && typeof result === "object") {
+          if (result.availability != null) {
+            setAvailArr(result.availability);
+          }
+          if (result.availableweekly != null) {
+            setWeeeklyAvailData(result.availableweekly);
+          }
+          if (result.unavailable != null) {
+            setunavailable(result.unavailable);
+          }
+        } else {
+          console.error("Invalid response from API:", result);
+          setError("Failed to load user data. Please try refreshing the page.");
         }
 
         setLoading(false);
         setError(null);
       } catch (err) {
-        setError(err.message);
-        // setData(null);
-      } finally {
+        console.error("Error fetching data:", err);
+        setError("Failed to load data: " + err.message);
         setLoading(false);
       }
     };
@@ -352,18 +452,15 @@ const Availability = () => {
             type="checkbox"
             name="unavailable"
             checked={"yes" == unavailable}
-            value={unavailable}
+            value={unavailable || ""}
             onChange={handleUncertainChange}
             id="unavailable"
           />
-          <label for="unavailable">
+          <label htmlFor="unavailable">
             Make me Unavailable for a uncertain period of time
           </label>
         </div>
-        {/* <button   value="Save" ><button/> */}
-        <button type="submit" className={modelCss.weeklysavebtn}>
-          Save
-        </button>
+        <input className={modelCss.weeklysavebtn} type="submit" value="Save" />
         <p className={modelCss.message}> {unavailMessage} </p>
       </form>
 
@@ -516,7 +613,7 @@ const Availability = () => {
             <input
               type="date"
               name="excludeFutureDate"
-              value={weeeklyAvailData.excludeFutureDate}
+              value={weeeklyAvailData.excludeFutureDate || ""}
               onChange={handleWeeklyChange}
               className={modelCss.input}
             />
@@ -528,7 +625,7 @@ const Availability = () => {
               <input
                 type="date"
                 name="excludeFutureRangeFrom"
-                value={weeeklyAvailData.excludeFutureRangeFrom}
+                value={weeeklyAvailData.excludeFutureRangeFrom || ""}
                 onChange={handleWeeklyChange}
                 className={modelCss.input}
               />
@@ -536,7 +633,7 @@ const Availability = () => {
               <input
                 type="date"
                 name="excludeFutureRangeTo"
-                value={weeeklyAvailData.excludeFutureRangeTo}
+                value={weeeklyAvailData.excludeFutureRangeTo || ""}
                 onChange={handleWeeklyChange}
                 className={modelCss.input}
               />
@@ -583,7 +680,7 @@ const Availability = () => {
             ))}
         </div>
 
-        {/* <form onSubmit={handleAvaiability}>
+        <form onSubmit={handleAvaiability}>
           <div className={modelCss.availBox}>
             <div className={modelCss.timeBox}>
               <label>Start Date</label>
@@ -612,57 +709,85 @@ const Availability = () => {
             </div>
 
             <div className={modelCss.submitBox}>
-              <button type="submit" className={modelCss.save} onClick={addTime}>
+              <button
+                type="button"
+                className={modelCss.save}
+                onClick={handleAddTimeSlot}
+              >
                 Add
+              </button>
+              <button type="submit" className={modelCss.save}>
+                Save Availability
               </button>
               {loading ? <img width="30px" src={loading_url} /> : ""}
             </div>
-          </div>
-        </form> */}
-
-        <form onSubmit={handleAvaiability}>
-          <div className={modelCss.availcard}>
-            <h3>If you are sometimes available</h3>
-
-            <div className={modelCss.timerow}>
-              <div className={modelCss.timebox}>
-                <label>Start Date</label>
-                <DatePicker
-                  showTimeSelect
-                  timeFormat="HH:mm"
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date)}
-                  timeClassName={handleColor}
-                  timeIntervals={60}
-                  dateFormat="yyyy-MM-dd HH:mm"
-                  className="date-input"
-                />
-              </div>
-
-              <div className={modelCss.timebox}>
-                <label>End Date</label>
-                <DatePicker
-                  showTimeSelect
-                  timeFormat="HH:mm"
-                  selected={endDate}
-                  onChange={(date) => setEndDate(date)}
-                  timeClassName={handleColor}
-                  timeIntervals={60}
-                  dateFormat="yyyy-MM-dd HH:mm"
-                  className="date-input"
-                />
-              </div>
-            </div>
-
-            <div className={modelCss.submitrow}>
-              <button type="submit" className={modelCss.btn} onClick={addTime}>
-                Add
-              </button>
-              {loading && <img width="30px" src={loading_url} alt="loading" />}
-            </div>
+            <p className={modelCss.message}>{availabilityMessage}</p>
           </div>
         </form>
       </div>
+
+      {/* <div class={modelCss.sometimes}>
+        <div>
+          <strong> If your are sometimes available </strong>
+          <ul className={availHeaderClass}>
+            <li className={modelCss.timeList}> Start </li>
+            <li className={modelCss.timeList}>End</li>
+          </ul>
+          {availArr &&
+            availArr.map((avail) => (
+              <ul className={modelCss.availList} key={avail.id}>
+                <li className={modelCss.timeList}>
+                  {getTimefromTS(avail.start)}
+                </li>
+                <li className={modelCss.timeList}>
+                  {getTimefromTS(avail.end)}
+                </li>
+                <li className={modelCss.timeList}>
+                  <button onClick={() => removeTime(avail.id, this)}>
+                    Delete
+                  </button>
+                </li>
+              </ul>
+            ))}
+        </div>
+
+        <form onSubmit={handleAvaiability}>
+          <div className={modelCss.availBox}>
+            <div className="timeBox">
+              <div>Start Date</div>
+              <DatePicker
+                showTimeSelect
+                timeFormat="HH:mm"
+                selected={startDate}
+                onChange={(date) => setStartDate(date)}
+                timeClassName={handleColor}
+                timeIntervals={60}
+                dateFormat="yyyy-MM-dd HH:mm"
+              />
+            </div>
+
+            <div className={modelCss.timeBox2}>
+              <div>End Date</div>
+              <DatePicker
+                showTimeSelect
+                timeFormat="HH:mm"
+                selected={endDate}
+                onChange={(date) => setEndDate(date)}
+                timeClassName={handleColor}
+                timeIntervals={60}
+                dateFormat="yyyy-MM-dd HH:mm"
+              />
+            </div>
+
+            <div class="submitbox">
+              <button type="submit" className={modelCss.save} onClick={addTime}>
+                Add
+              </button>
+              {loading ? <img width="30px" src={loading_url} /> : " "}
+            </div>
+          </div>
+        </form>
+      </div> */}
     </Layout>
   );
 };

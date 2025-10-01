@@ -57,7 +57,7 @@ const ClientRegStep3 = ({
       )}
       <input
         type="text"
-        placeholder="Preferred model (optional)"
+        placeholder="Preferred therapist (optional)"
         value={formData.selected_model}
         onChange={handleChange("selected_model")}
       />

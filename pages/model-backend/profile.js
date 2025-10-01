@@ -5,7 +5,7 @@ import GalleryImages from "../../components/galleryImages";
 
 import modelCss from "../../styles/model.module.css";
 import ServicePricesUI from "../../components/servicePricesUI";
-import withAuth from "../../components/admin/withAuth";
+import withAuth from "../../components/model/withAuth";
 import Ethnicities from "../../components/data/ethnicities.js";
 import Services from "../../components/data/services.js";
 import axios from "axios";
@@ -397,7 +397,8 @@ const Profile = () => {
                 name="gender"
                 value={model.gender}
                 className={modelCss.select}
-                onChange={handleInputChange}>
+                onChange={handleInputChange}
+              >
                 <option value="">Select</option>
                 <option value="Female">Female</option>
                 <option value="Male">Male</option>
@@ -433,7 +434,8 @@ const Profile = () => {
                 value={model.selectedAreas_primary}
                 className={modelCss.select}
                 onChange={handleAreaChangePrimary}
-                style={{ width: "100%", height: "300px" }}>
+                style={{ width: "100%", height: "300px" }}
+              >
                 {areas.map((group) => (
                   <optgroup key={group.label} label={group.label}>
                     {group.options.map((item) => (
@@ -459,7 +461,8 @@ const Profile = () => {
                 value={model.selectedAreas}
                 onChange={handleAreaChange}
                 className={modelCss.select}
-                style={{ width: "100%", height: "300px" }}>
+                style={{ width: "100%", height: "300px" }}
+              >
                 {areas.map((group) => (
                   <optgroup key={group.label} label={group.label}>
                     {group.options.map((item) => (
@@ -480,7 +483,8 @@ const Profile = () => {
                 multiple
                 value={model.location_type}
                 className={modelCss.select}
-                onChange={handleLocationTypeChange}>
+                onChange={handleLocationTypeChange}
+              >
                 <option value="">Select</option>
                 <option value="inCall">inCall</option>
                 <option value="outCall">outCall</option>
@@ -518,7 +522,8 @@ const Profile = () => {
                 name="ethnicity"
                 value={model.ethnicity}
                 className={modelCss.select}
-                onChange={handleInputChange}>
+                onChange={handleInputChange}
+              >
                 <option value="">Select</option>
                 {Ethnicities.map((item) => (
                   <option key={item} value={item}>
@@ -559,7 +564,8 @@ const Profile = () => {
                 name="color"
                 value={model.color}
                 className={modelCss.select}
-                onChange={handleInputChange}>
+                onChange={handleInputChange}
+              >
                 <option value="">Select</option>
                 <option value="White">White</option>
                 <option value="Black">Black</option>
@@ -583,7 +589,8 @@ const Profile = () => {
                 rows="4"
                 cols="50"
                 name="about"
-                value={model.about}></textarea>
+                value={model.about}
+              ></textarea>
             </div>
 
             {/* Profile Picture */}

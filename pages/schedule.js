@@ -221,7 +221,7 @@ function Booking() {
       return(
         <div className='registration-container'>
           <h3> Enter your card details </h3>
-          <p> We will save your card in a Square secure server and charge you after the model accept your request </p>
+          <p> We will save your card in a Square secure server and charge you after the therapist accept your request </p>
           <SquareForm customer_id={orderData.customer_id} model_id={orderData.model_id} service_address={orderData.service_address} service_type={orderData.service_type} service_time={orderData.service_time}  price={orderData.amount_received}  showSuccessPage={showSuccessPage} />
         </div>
       );
