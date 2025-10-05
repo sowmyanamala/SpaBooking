@@ -39,15 +39,15 @@ if (!empty($modelId)) {
     $sql = "SELECT 
                 o.id,
                 o.date_of_creation AS request_time,
-                o.service_address AS address,
-                o.service_type AS call_type,
-                o.service_time,
-                o.order_status AS status,
+                COALESCE(o.service_address, '') AS address,
+                COALESCE(o.service_type, o.call_type, '') AS call_type,
+                COALESCE(o.service_time, o.time, '') AS service_time,
+                COALESCE(o.order_status, o.status, 'Initiated') AS status,
                 o.customer_id,
                 o.model_id,
-                o.amount_received AS amount,
-                c.name AS customer_name,
-                m.name AS model_name
+                COALESCE(o.amount_received, o.amount, o.total, 0) AS amount,
+                COALESCE(c.name, 'Unknown Customer') AS customer_name,
+                COALESCE(m.name, 'Unknown Therapist') AS model_name
             FROM orders o
             LEFT JOIN customers c ON o.customer_id = c.id
             LEFT JOIN models m ON o.model_id = m.id
@@ -69,4 +69,4 @@ while ($row = $result->fetch_assoc()) {
 }
 
 echo json_encode($rows);
-
+?>

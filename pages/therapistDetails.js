@@ -4,6 +4,7 @@ import axios from "axios";
 import styles from "../styles/therapistDetails.module.css";
 import BookingModal from "../components/BookingModal";
 import LoginModal from "../components/LoginModal";
+import { formatTime12Hour, isTimeInPast } from "../utils/timeFormat";
 
 // Local YYYY-MM-DD (no UTC day shift)
 const formatDate = (d) =>
@@ -111,9 +112,8 @@ export default function TherapistDetails() {
     const todayStr = formatDate(new Date());
     if (selectedDate !== todayStr) return record.slots || [];
 
-    const nowHour = new Date().getHours();
     return (record.slots || []).filter(
-      (slot) => parseInt(slot.split(":")[0], 10) > nowHour
+      (slot) => !isTimeInPast(slot, selectedDate)
     );
   }, [availability, selectedDate]);
 
@@ -257,11 +257,13 @@ export default function TherapistDetails() {
         <div className={styles.layout}>
           {/* Left panel */}
           <div className={styles.leftPanel}>
-            <img
-              src={therapist.picture_url || "/images/default.jpg"}
-              alt={therapist.name}
-              className={styles.profilePic}
-            />
+            <div className={styles.imageContainer}>
+              <img
+                src={therapist.picture_url || "/images/default.jpg"}
+                alt={therapist.name}
+                className={styles.profilePic}
+              />
+            </div>
             <div className={styles.details}>
               <p>
                 <strong>Name:</strong> {therapist.name}
@@ -324,23 +326,53 @@ export default function TherapistDetails() {
             {!loadingAvail && availError && <p>{availError}</p>}
 
             {!loadingAvail && !availError && availability.length > 0 && (
-              <div className={styles.datesRow}>
-                {availability.map((day) => (
-                  <div
-                    key={day.date}
-                    className={`${styles.dateBlock} ${
-                      selectedDate === day.date ? styles.active : ""
-                    }`}
-                    onClick={() => setSelectedDate(day.date)}
-                  >
-                    <div>
-                      {toLocalDateObj(day.date)
-                        .toLocaleDateString("en-US", { weekday: "short" })
-                        .toUpperCase()}
-                    </div>
-                    <div>{toLocalDateObj(day.date).getDate()}</div>
-                  </div>
-                ))}
+              <div className={styles.calendarContainer}>
+                {(() => {
+                  // Group dates by month
+                  const groupedByMonth = availability.reduce((acc, day) => {
+                    const date = toLocalDateObj(day.date);
+                    const monthKey = date.toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                    });
+
+                    if (!acc[monthKey]) {
+                      acc[monthKey] = [];
+                    }
+                    acc[monthKey].push(day);
+                    return acc;
+                  }, {});
+
+                  return Object.entries(groupedByMonth).map(
+                    ([monthName, days]) => (
+                      <div key={monthName} className={styles.monthSection}>
+                        <h4 className={styles.monthHeader}>{monthName}</h4>
+                        <div className={styles.datesRow}>
+                          {days.map((day) => (
+                            <div
+                              key={day.date}
+                              className={`${styles.dateBlock} ${
+                                selectedDate === day.date ? styles.active : ""
+                              }`}
+                              onClick={() => setSelectedDate(day.date)}
+                            >
+                              <div className={styles.dayOfWeek}>
+                                {toLocalDateObj(day.date)
+                                  .toLocaleDateString("en-US", {
+                                    weekday: "short",
+                                  })
+                                  .toUpperCase()}
+                              </div>
+                              <div className={styles.dayNumber}>
+                                {toLocalDateObj(day.date).getDate()}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  );
+                })()}
               </div>
             )}
 
@@ -356,7 +388,7 @@ export default function TherapistDetails() {
                       }`}
                       onClick={() => setSelectedSlot(slot)}
                     >
-                      {slot}
+                      {formatTime12Hour(slot)}
                     </button>
                   ))
                 ) : (

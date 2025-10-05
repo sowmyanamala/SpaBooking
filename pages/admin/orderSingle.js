@@ -6,6 +6,7 @@ import axios from "axios";
 import AdminLayout, { siteTitle } from "../../components/admin/layout";
 import ordersStyles from "../../styles/admin/orders.module.css";
 import withAuth from "../../components/admin/withAuth";
+import { formatTime12Hour, formatDateTime12Hour } from "../../utils/timeFormat";
 
 function OrderSingle() {
   const router = useRouter();
@@ -180,7 +181,9 @@ function OrderSingle() {
               </div>
               <div className={ordersStyles.infoItem}>
                 <span className={ordersStyles.infoLabel}>Request Date:</span>
-                <span className={ordersStyles.infoValue}>{requestTime}</span>
+                <span className={ordersStyles.infoValue}>
+                  {formatDateTime12Hour(requestTime)}
+                </span>
               </div>
               <div className={ordersStyles.infoItem}>
                 <span className={ordersStyles.infoLabel}>Service Date:</span>
@@ -188,7 +191,9 @@ function OrderSingle() {
               </div>
               <div className={ordersStyles.infoItem}>
                 <span className={ordersStyles.infoLabel}>Service Time:</span>
-                <span className={ordersStyles.infoValue}>{serviceTime}</span>
+                <span className={ordersStyles.infoValue}>
+                  {formatTime12Hour(serviceTime)}
+                </span>
               </div>
             </div>
           </div>
