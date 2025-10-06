@@ -107,6 +107,24 @@ function handleReportUpdated($conn, $data) {
     $stmt->bind_param("sss", $our_status, $report_id, $candidate_id);
     $stmt->execute();
     
+    // If verification is approved, update the models table to mark therapist as verified
+    if ($our_status === 'approved') {
+        $update_models_sql = "UPDATE models 
+                             SET verified = 1, 
+                                 updated_at = NOW()
+                             WHERE id = (
+                                 SELECT therapist_id 
+                                 FROM therapist_verifications 
+                                 WHERE candidate_id = ?
+                             )";
+        
+        $update_stmt = $conn->prepare($update_models_sql);
+        $update_stmt->bind_param("s", $candidate_id);
+        $update_stmt->execute();
+        
+        error_log("Therapist marked as verified for candidate: $candidate_id");
+    }
+    
     error_log("Report updated: $report_id, status: $status -> $our_status");
 }
 
