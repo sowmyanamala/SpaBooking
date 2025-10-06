@@ -16,3 +16,4 @@ function TherapistsPage() {
 export default withAuth(TherapistsPage);
 
 
+

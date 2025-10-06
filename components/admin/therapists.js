@@ -8,6 +8,7 @@ const API = "/api/admin/therapists"; // ← therapists proxy with fallback
 export default function Therapists() {
   const [rows, setRows] = useState([]);
   const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const limit = 25;
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
@@ -18,21 +19,47 @@ export default function Therapists() {
     setLoading(true);
     setErr("");
     try {
+      // Use PHP API directly since Next.js has database connection issues
       const res = await fetch(
-        `${API}?page=${page}&limit=${limit}&t=${Date.now()}`,
+        `https://tsm.spagram.com/api/therapists.php?page=${page}&limit=${limit}&t=${Date.now()}`,
         {
           cache: "no-store",
         }
       );
-      const j = await res.json();
-      console.log("Therapists API response:", j);
-      const ok =
-        res.ok &&
-        (j?.success === 1 || j?.success === "1" || j?.success === true);
-      if (!ok) throw new Error(j?.message || `HTTP ${res.status}`);
-      const data = Array.isArray(j.data) ? j.data : [];
-      console.log("Therapists data:", data);
-      setRows(data);
+      const responseData = await res.json();
+      console.log("Therapists PHP API response:", responseData);
+      
+      if (!responseData.success || !Array.isArray(responseData.data)) {
+        throw new Error("Invalid data format from PHP API");
+      }
+      
+      const data = responseData.data;
+
+      // Get verification status from PHP API
+      const verificationRes = await fetch(
+        "https://tsm.spagram.com/api/get-verification-status.php"
+      );
+      const verificationData = await verificationRes.json();
+      const verifiedIds = verificationData.success
+        ? verificationData.verified_ids
+        : [];
+      console.log("Verified therapist IDs:", verifiedIds);
+
+      // Map the data and add verification status
+      const mappedData = data.map((therapist) => ({
+        ...therapist,
+        status:
+          therapist.status === "ready"
+            ? "active"
+            : therapist.status === "pending"
+            ? "suspended"
+            : therapist.status || "active",
+        verified: verifiedIds.includes(therapist.id),
+      }));
+
+      console.log("Mapped therapists data with verification:", mappedData);
+      setRows(mappedData);
+      setTotal(responseData.total || mappedData.length);
     } catch (e) {
       setErr(e.message || "Failed to load therapists");
     } finally {
@@ -95,6 +122,38 @@ export default function Therapists() {
     }
   };
 
+  const handleToggleVerification = async (id, currentVerified) => {
+    const newVerified = !currentVerified;
+    try {
+      const res = await fetch(
+        `https://tsm.spagram.com/api/toggle-verification.php?id=${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ verified: newVerified }),
+        }
+      );
+      const j = await res.json();
+      const ok =
+        res.ok &&
+        (j?.success === 1 || j?.success === "1" || j?.success === true);
+      if (ok) {
+        setRows((u) =>
+          u.map((r) => (r.id === id ? { ...r, verified: newVerified } : r))
+        );
+        // Show success message
+        alert(
+          `Therapist ${newVerified ? "verified" : "unverified"} successfully!`
+        );
+      } else {
+        alert(j?.message || "Failed to update verification status");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to update verification status");
+    }
+  };
+
   const handleViewVerification = (therapist) => {
     setSelectedTherapist(therapist);
     setShowVerificationStatus(true);
@@ -140,6 +199,7 @@ export default function Therapists() {
             <th>Service Area</th>
             <th>Gender</th>
             <th>Status</th>
+            <th>Verified</th>
             <th>Verification</th>
             <th>Actions</th>
           </tr>
@@ -155,6 +215,36 @@ export default function Therapists() {
               <td>{t.gender || "N/A"}</td>
               <td>
                 <span className={styles.badge}>{t.status || "active"}</span>
+              </td>
+              <td>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                >
+                  <span
+                    className={styles.badge}
+                    style={{
+                      backgroundColor: t.verified ? "#10b981" : "#ef4444",
+                      color: "white",
+                    }}
+                  >
+                    {t.verified ? "Yes" : "No"}
+                  </span>
+                  <button
+                    onClick={() => handleToggleVerification(t.id, t.verified)}
+                    style={{
+                      padding: "4px 8px",
+                      fontSize: "12px",
+                      backgroundColor: t.verified ? "#ef4444" : "#10b981",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                    title={t.verified ? "Click to unverify" : "Click to verify"}
+                  >
+                    {t.verified ? "Unverify" : "Verify"}
+                  </button>
+                </div>
               </td>
               <td>
                 <button
