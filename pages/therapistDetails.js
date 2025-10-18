@@ -17,6 +17,26 @@ const toLocalDateObj = (iso) => {
   return new Date(y, m - 1, d);
 };
 
+// Format height: convert "5.6" to "5'6"" or keep "5'6"" as is
+const formatHeight = (height) => {
+  if (!height) return "";
+
+  // Already in correct format (5'6")
+  if (height.includes("'") && height.includes('"')) {
+    return height;
+  }
+
+  // Convert decimal format (5.6) to 5'6"
+  const decimalHeight = parseFloat(height);
+  if (!isNaN(decimalHeight)) {
+    const feet = Math.floor(decimalHeight);
+    const inches = Math.round((decimalHeight - feet) * 10);
+    return `${feet}'${inches}"`;
+  }
+
+  return height; // Return as-is if format is unexpected
+};
+
 export default function TherapistDetails() {
   const [therapist, setTherapist] = useState(null);
 
@@ -282,7 +302,7 @@ export default function TherapistDetails() {
                 <strong>Ethnicities:</strong> {therapist.ethnicity}
               </p>
               <p>
-                <strong>Height:</strong> {therapist.height}
+                <strong>Height:</strong> {formatHeight(therapist.height)}
               </p>
               <p>
                 <strong>Age:</strong> {therapist.age}
@@ -469,4 +489,3 @@ export default function TherapistDetails() {
     </div>
   );
 }
-
