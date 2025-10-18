@@ -348,3 +348,4 @@ interface User {
 ---
 
 For full documentation, see [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)
+

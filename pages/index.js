@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import Layout from "../components/layout";
 import GeoMap from "../components/GeoMap";
@@ -114,29 +114,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* MAP VIEW SECTION */}
-      <section className={styles.mapSection}>
-        <div className={styles.mapSectionHeader}>
-          <h2 className={styles.mapSectionTitle}>Find Therapists Near You</h2>
-          <p className={styles.mapSectionDescription}>
-            Use our interactive map to discover therapists in your area with
-            real-time availability
-          </p>
-          <button
-            className={styles.toggleMapButton}
-            onClick={() => setShowMapView(!showMapView)}
-          >
-            {showMapView ? "📋 Switch to List View" : "🗺️ View Map"}
-          </button>
-        </div>
-
-        {showMapView && (
-          <div className={geoStyles.mapWrapper}>
-            <GeoMap />
-          </div>
-        )}
-      </section>
-
       {/* SEARCH BAR */}
       <div className={styles.searchHeader}>
         <input
@@ -152,7 +129,23 @@ export default function Home() {
         >
           {showFilters ? "Hide Filters" : "Show Filters"}
         </button>
+        <button
+          className={styles.toggleButton}
+          onClick={() => setShowMapView(!showMapView)}
+        >
+          {showMapView ? "📋 List View" : "🗺️ Map View"}
+        </button>
       </div>
+
+      {/* MAP VIEW */}
+      {showMapView && (
+        <div
+          className={geoStyles.mapWrapper}
+          style={{ margin: "20px auto", maxWidth: "1200px" }}
+        >
+          <GeoMap />
+        </div>
+      )}
 
       {/* FILTERS */}
       {showFilters && (
