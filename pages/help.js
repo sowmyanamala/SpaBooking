@@ -134,7 +134,7 @@ export default function Help() {
             </p>
             <div className={styles.contactButtons}>
               <a
-                href="mailto:support@spagram.com"
+                href="mailto:info@spagram.com"
                 className={styles.contactButton + " " + styles.emailButton}
               >
                 Email Support

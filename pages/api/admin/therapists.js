@@ -1,4 +1,14 @@
 // pages/api/admin/therapists.js
+import mysql from "mysql2/promise";
+
+// Database configuration
+const dbConfig = {
+  host: process.env.DB_HOST || "localhost",
+  user: process.env.DB_USER || "msgdbusr",
+  password: process.env.DB_PASS || "t10f73&La",
+  database: process.env.DB_NAME || "msgdb",
+  port: process.env.DB_PORT || 3306,
+};
 
 export default async function handler(req, res) {
   const PHP = "https://tsm.spagram.com/api/models.php";
@@ -24,6 +34,44 @@ export default async function handler(req, res) {
       return r;
     } finally {
       clearTimeout(t);
+    }
+  };
+
+  // Helper function to get verification status from database
+  const getVerificationStatus = async (therapistIds) => {
+    try {
+      const connection = await mysql.createConnection(dbConfig);
+
+      // Check if verified column exists
+      const [columns] = await connection.execute(
+        "SHOW COLUMNS FROM models LIKE 'verified'"
+      );
+      if (columns.length === 0) {
+        // Add verified column if it doesn't exist
+        await connection.execute(
+          "ALTER TABLE models ADD COLUMN verified TINYINT(1) DEFAULT 0 COMMENT 'Whether the therapist is verified (0 = not verified, 1 = verified)'"
+        );
+      }
+
+      // Get verification status for all therapists
+      const placeholders = therapistIds.map(() => "?").join(",");
+      const [rows] = await connection.execute(
+        `SELECT id, verified FROM models WHERE id IN (${placeholders})`,
+        therapistIds
+      );
+
+      await connection.end();
+
+      // Create a map of id -> verified status
+      const verificationMap = {};
+      rows.forEach((row) => {
+        verificationMap[row.id] = row.verified === 1;
+      });
+
+      return verificationMap;
+    } catch (error) {
+      console.error("Error fetching verification status:", error);
+      return {};
     }
   };
 
@@ -53,6 +101,10 @@ export default async function handler(req, res) {
 
         // Handle models.php response (array format)
         if (r.ok && Array.isArray(j)) {
+          // Get verification status from database
+          const therapistIds = j.map((t) => t.id);
+          const verificationMap = await getVerificationStatus(therapistIds);
+
           const mappedData = j.map((therapist) => ({
             ...therapist,
             status:
@@ -61,6 +113,7 @@ export default async function handler(req, res) {
                 : therapist.status === "pending"
                 ? "suspended"
                 : therapist.status || "active",
+            verified: verificationMap[therapist.id] || false,
           }));
           console.log(
             `Showing all ${mappedData.length} therapists from models.php`
@@ -81,7 +134,21 @@ export default async function handler(req, res) {
         console.log(
           `Showing all ${j.data.length} therapists out of ${j.total} total from therapists.php`
         );
-        return res.status(200).json(j);
+
+        // Get verification status from database
+        const therapistIds = j.data.map((t) => t.id);
+        const verificationMap = await getVerificationStatus(therapistIds);
+
+        // Add verification status to therapists.php response
+        const therapistsWithVerification = j.data.map((therapist) => ({
+          ...therapist,
+          verified: verificationMap[therapist.id] || false,
+        }));
+
+        return res.status(200).json({
+          ...j,
+          data: therapistsWithVerification,
+        });
       }
 
       return res.status(r.status).json({

@@ -17,12 +17,8 @@ export default function AdminLayout({
   const [searchResults, setSearchResults] = useState([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("adminDarkMode") === "true";
-    }
-    return false;
-  });
+  const [darkMode, setDarkMode] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const searchRef = useRef(null);
   const notificationsRef = useRef(null);
@@ -52,6 +48,13 @@ export default function AdminLayout({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+  }, []);
+
+  // Initialize dark mode from localStorage after mount
+  useEffect(() => {
+    setMounted(true);
+    const savedDarkMode = localStorage.getItem("adminDarkMode") === "true";
+    setDarkMode(savedDarkMode);
   }, []);
 
   // Toggle dark mode class on body
@@ -118,13 +121,11 @@ export default function AdminLayout({
               </span>
             ))
           ) : (
-            <>
-              <Link href="/therapists">Therapists</Link>
+            <span className={styles.crumb}>
+              <Link href="/admin">Admin</Link>
               <span className={styles.sep}>/</span>
-              <Link href="/admin">Dashboards</Link>
-              <span className={styles.sep}>/</span>
-              <span className={styles.muted}>Home</span>
-            </>
+              <span className={styles.muted}>{title}</span>
+            </span>
           )}
         </nav>
 
@@ -181,7 +182,7 @@ export default function AdminLayout({
           aria-label="Toggle dark mode"
           onClick={toggleDarkMode}
         >
-          {darkMode ? "🌙" : "☀️"}
+          {mounted ? (darkMode ? "🌙" : "☀️") : "☀️"}
         </button>
       </div>
 

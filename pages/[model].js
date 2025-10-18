@@ -1,670 +1,471 @@
-import React, { useState, useEffect } from 'react';
-import Head from 'next/head';
-import utilStyles from  '../styles/utils.module.css';
-import Layout, { siteTitle } from '../components/layout';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-// import Router from 'next/router';
-import axios from 'axios';
-import SingleModelView from '../components/singleModelView';
-import Loading from '../components/Loading';
-import SquareForm from '../components/squareform';
-import ModelReview from '../components/modelReview';
-
-
-
-
-
-//  <SquareForm /> 
-
-
-
-
-function Booking() {
-
-    const [formData, setFormData] = useState({name: '', email: '', phone: '', address: '', city: '', zip: '', password: '', selected_model: ''});  
-    const [orderData, setOrderData] = useState({customer_id: '', model_id: '', service_address: '', service_type: '', service_time: '', amount_received: '', cardid:'', status:''});  
-
-    
-    const [isCalltypeSelected, setIsCalltypeSelected] = useState(true);
-    const [isTimeSelected, setIsTimeSelected] = useState(false);
-    const [isDateSelected, setIsDateSelected] = useState(false);
-    const [succMessage, setSuccMessage] = useState(null);
-    const [modelID, setModelID] = useState(null);
-    const [singleModel, setSingleModel] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [message, setMessage] = useState(null);
-    const [loginmessage, setLoginmessage] = useState("");
-    const [loginform, setLoginform] = useState(true);
-    const [modelAvailTime, setModelAvailTime] = useState(null);
-    const [showCardForm, setShowCardForm] = useState(false);
-    const [incall, setIncall] = useState(true);
-    const [selectedCallType, setSelectedCallType] = useState();
-    const [inCallSelected, setInCallSelected] = useState(false);
-    const [outCallSelected, setOutCallSelected] = useState(false);
-    const [outCallLocation, setOutCallLocation] = useState(false);
-    const [inCallLocation, setInCallLocation] = useState(false);
-    const [showSaveCard, setShowSaveCard] = useState(false);
-    const [showSuccessPage, setShowSuccessPage] = useState(false);
-    const [tdate, setTdate] = useState(null);
-    
-    
-    
-    const [dayhours, setDayhours] = useState(['9 am', '10 am', '11 am', '12 pm', '1 pm', '2 pm', '3 pm', '4 pm', '5 pm', '6 pm', '7 pm', '8 pm', '9 pm', '10 pm',
-      '11 pm', '12 am', '1 am', '2 am', '3 am', '4 am', '5 am', '6 am', '7 am', '8 am']);
-    
-
-    const [loginformData, setLoginformData] = useState({
-      email: '',
-      password: '',
-    });
-
-    const reviewGen = () => {
-      const possibleValues = [3.5, 4, 4.5, 5];
-      const randomIndex = Math.floor(Math.random() * possibleValues.length);
-      return possibleValues[randomIndex];
-      
-    }
-  
-    const handleLoginFieldChange = (e) => {
-      setFormData({
-        ...formData,
-        [e.target.name]: e.target.value
-      });
-    };
-
-
-    const callDefaultFunctions = () => {
-      const loc_type = singleModel[0].location_type;
-      const locArr = loc_type.split(',');
-      if(locArr.length < 2){
-        calltypeSelector(locArr[0]);
-      }
-    }
-
-
-    // const showSingleModelAndinCall = () => {
-    //    calltypeSelector("inCall");
-    //   return(
-    //     <SingleModelView  {...singleModel}  />
-    //   )
-    // }
-
-    const getcardEndingwith = () => {
-      // let customerId = localStorage.getItem('customerid');
-      // try {
-      //   const response = await axios.get('https://tsm.spagram.com/api/cardendwith.php?customerid=' + customerId);
-      //   console.log('caardindwith', response.data);
-      //   // if(response.data.success == '1') {
-              
-      //   //   cardending = response.data.cardend;
-      //   //       // window.location.href = location.state ? location.state.from.pathname : '/';
-      //   // }
-  
-    
-      // } catch (error) {
-      //   console.error(error);
-      // }
-      
-      return ' ';
-    };
-
-    const router = useRouter();
-    
-    let singleApiUrl = "";
-
-    // const modId = singleApiUrl.split("=")[1];
-    // console.log('urs', modelID);
-
-    // const queryString = window.location.href;
-    // console.log(queryString);
-    // const urlParams = new URLSearchParams(queryString);
-    // const product = urlParams.get('id')
-    //   console.log('modiel id', id);
-
-    const calltypeSelector = (e) => {
-      console.log('calltype selector func called');
-      let ctype = e.target.value;
-      setSelectedCallType(ctype);
-      if(ctype == 'inCall'){
-        setInCallSelected(true);
-        setOutCallSelected(false);
-        const saddress = singleModel[0].incall_location;
-        setOrderData({...orderData, service_address: saddress, service_type: 'inCall' });
-
-      }else{
-        setOutCallSelected(true);
-        setInCallSelected(false);
-      }
-    }
-
-    const handleOutcallLocation = (e) => {
-      setOutCallLocation(e.target.value);
-      setOrderData({...orderData, service_address: e.target.value, service_type: 'outCall' });
-    }
-
-    // this is button version, but got a problem showing address without clicking the incall button when inCall is the only option
-    // const location_selector = () => {
-    //   const loc_type = singleModel[0].location_type;
-    //   const locArr = loc_type.split(',');
-    //   return(
-    //     <div className='calltypeCnt'>
-    //         <div className='calltypes'> <span> inCall/outCall :  </span> { locArr.length < 2 ? <button onClick={()=> calltypeSelector(locArr[0]) } className={inCallSelected?'selected': ''}> {locArr[0]} </button> : <div> <button onClick={()=> calltypeSelector(locArr[0]) } className={inCallSelected?'selected': ''}> {locArr[0]} </button> <button onClick={()=> calltypeSelector(locArr[1]) } className={outCallSelected?'selected': ''}> {locArr[1]} </button> </div> }  </div> 
-    //       <div> { selectedCallType ?  selectedCallType == "inCall"? ' Incall Location: ' + singleModel[0].incall_location  : <div> <input type='text' onChange={handleOutcallLocation} placeholder='Enter Outcall Location' name='outcall_location' /> </div> : '' } </div>
-    //       <div>  </div>
-    //     </div>
-    //   )
-    // }
-
-
-    const location_selector = () => {
-      const loc_type = singleModel[0].location_type;
-      const locArr = loc_type.split(',');
-      return(
-        <div className='calltypeCnt'>
-            <div className='calltypes'> { locArr.length < 2 ? <select class={isCalltypeSelected ? ' ' : 'warn'} onChange={calltypeSelector}><option>inCall/outCall</option><option>{locArr[0]}</option></select> : <select class={isCalltypeSelected ? ' ' : 'warn'} onChange={calltypeSelector}><option>inCall/outCall</option><option>{locArr[0]}</option><option>{locArr[1]}</option></select> }  </div> 
-          <div> { selectedCallType ?  selectedCallType == "inCall"? ' Incall Location: ' + singleModel[0].incall_location  : '' : '' } </div>
-          <div> { selectedCallType ?  selectedCallType == "outCall" ?  <div> <input type='text' class={isCalltypeSelected ? ' ' : 'warn'} onChange={handleOutcallLocation} placeholder='Enter Outcall Location' name='outcall_location' /> </div> : '' : '' } </div>
-          <div>  </div>
-        </div>
-      )
-    }
-   
-    const handleChange = (e) => {
-      setFormData({
-        ...formData,
-        [e.target.name]: e.target.value
-      });
-    };
-
-    const get10percent = (price) => {
-      let priceinF = parseFloat(price);
-      let tenp = (10 / 100) * priceinF;
-      return tenp.toFixed(2);
-      // return priceinF;
-    }
-
-
-    const confirmorder = async (e) => {
-      e.preventDefault();
-      try {
-        console.log('incall location', singleModel[0].incall_location, inCallSelected);
-        const saddress = singleModel[0].incall_location;
-        //Status: 
-        // Initiated
-        // CardFailed 
-        // Paid
-        // Approved 
-        // Denied
-        // Refunded 
-        // Done 
-
-       
-        console.log('orderdata before confirmorder ', orderData);
-        const response = await axios.post('https://tsm.spagram.com/api/confirmorder.php', orderData);
-        console.log('order retured', response.data);
-        if(response.data.success == '1') {
-              const { token } = response.data;
-              
-              // setSuccMessage('Order confirmed! Please check your email for details');
-             localStorage.setItem("customertoken", token);
-             window.location.href = "/cardsaved";
-              
-              // window.location.href = location.state ? location.state.from.pathname : '/';
-        }else{
-          window.location.href = "/cardnotsaved";
-        }
-  
-    
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-
-    const cardForm = () => {
-      return(
-        <div className='registration-container'>
-          <h3> Enter your card details </h3>
-          <p> We will save your card in a Square secure server and charge you after the model accept your request. Please use the same zip you entered you zip field of previous step.  </p>
-          <SquareForm customer_id={orderData.customer_id} model_id={orderData.model_id} service_address={orderData.service_address} service_type={orderData.service_type} service_time={orderData.service_time}  price={orderData.amount_received}  showSuccessPage={showSuccessPage} />
-        </div>
-      );
-      
-    };
-
-    const handleLogin = async (e) => {
-      e.preventDefault();
-      try {
-        const response = await axios.post('https://tsm.spagram.com/api/login-customer.php', formData);
-        console.log('rest', response.data);
-        if(response.data.success == '1') {
-              const { token } = response.data;
-              console.log('retured after login', response.data)
-              localStorage.setItem("customertoken", token);
-              setIsLoggedIn(true);
-              setOrderData({
-                ...orderData,
-                customer_id: token
-              });
-      
-              // window.location.href = location.state ? location.state.from.pathname : '/';
-        }else{
-          setLoginmessage("Email/Password is not correct. Please try again or click to the button below to register. ");
-        }
-  
-    
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    
-
-    const handleCustomerRegistration = async (e) => {
-      e.preventDefault();
-      setLoading(true);
-      setSuccMessage("");
-      try {
-        formData.selected_model = modelID;
-
-        const response = await axios.post('https://tsm.spagram.com/api/register-customer.php', formData);
-        console.log('client data', formData);
-        console.log('rest', response.data);
-        if(response.data.success == '1') {
-              const { customerdbid, cardsaved } = response.data;
-              localStorage.setItem("customerdbid", customerdbid);
-              localStorage.setItem("cardsaved", cardsaved);
-              localStorage.setItem("price", orderData.amount_received);
-
-              setOrderData({...orderData, customer_id: customerdbid });
-              
-              setSuccMessage("Your registration is successful");
-              setShowSaveCard(true);
-              setFormData({name: '', email: '', phone: '', address: '', city: '', zip: '', password: ''});
-              // router.push("http://localhost:3005/customer-success");
-              // window.location.href = location.state ? location.state.from.pathname : '/';
-              console.log('insertedcustomer id', customerdbid);
-              setLoading(false);
-        }else{
-          setLoading(false);
-          setSuccMessage("Error! Please contact support.");
-        }
-    
-    
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-  const userLogin = () => {
-    
-     const token = localStorage.getItem("customertoken");
-     console.log('h', token);
-      if (token) {
-        setIsLoggedIn(true);
-        setOrderData({
-          ...orderData,
-          customer_id: token
-        });
-
-      }
-  }
-
-  // const today = new Date();
-
-  const goNextDay = (dstring) => {
-    // console.log('current date:', currentdate);
-
-    // if(currentdate != ''){
-    //   dstring = currentdate
-    //   window.currentdate = '';
-    // }
-
-   const tomorrow = new Date(dstring);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    let day = tomorrow.getDate();
-    let month = tomorrow.getMonth() + 1;
-    let year = tomorrow.getFullYear();
-    let nextday = month + '/' + day + '/' + year;
-    setIsDateSelected(nextday);
-    console.log('Tomorrow:', nextday);
-    updateAvailTime(modelID, nextday)
-
-  }
-
-  const getTodayDate = () =>{
-    const today = new Date();
-    
-    let day = today.getDate();
-    let month = today.getMonth() + 1;
-    let year = today.getFullYear();
-    let todayFormated = month + '/' + day + '/' + year;
-    // console.log('insidetoday', day, month, year);
-    setIsDateSelected(todayFormated);
-    return todayFormated;
-  }
-
-  const goPrevDay = (dstring) => {
-    
-    const tomorrow = new Date(dstring);
-     tomorrow.setDate(tomorrow.getDate() - 1);
- 
-     let day = tomorrow.getDate();
-     let month = tomorrow.getMonth() + 1;
-     let year = tomorrow.getFullYear();
-     let prevday = month + '/' + day + '/' + year;
-     setIsDateSelected(prevday);
-     console.log('Tomorrow:',prevday);
-     updateAvailTime(modelID, prevday)
-   }
-
-   const updateAvailTime = async (modId, cdate) => {
-    // console.log('availtime udpated', modId, isDateSelected);
-    try {
-      let cdated = ''
-      if(cdate == ''){
-          const urlParams = new URLSearchParams(singleApiUrl);
-           cdated = urlParams.get('date')
-          setIsDateSelected(cdated);
-         // setIsDateSelected('4/8/2023');
-         setIsDateSelected(urlParams.get('time'));
-      }else{
-        cdated = cdate;
-        setIsDateSelected(cdate);
-      }
-
-      console.log('cdate', cdated);
-      
-
-      const response = await axios.get('https://tsm.spagram.com/api/availability.php?modelid='+ modId + '&date=' + cdated);
-
-      console.log('availdata','https://tsm.spagram.com/api/availability.php?modelid='+ modId + '&date=' + cdated, response.data);
-      setModelAvailTime(response.data);
-      if(response.data.success == '1') {
-            const { token } = response.data;
-            // localStorage.setItem("customertoken", token);
-            
-            // window.location.href = location.state ? location.state.from.pathname : '/';
-      }
-  
-    } catch (error) {
-      console.error(error);
-    }
-    // modelAvailTime
-   }
-
-   const isHourAvailable = (hour) => {
-
-    return ' hello="hi" ';
-
-   }
-
-   const xhours = [];
-
-  dayhours.map((hour) => { 
-    let xx = ""
-    if (modelAvailTime && modelAvailTime.includes(hour)){
-      xhours.push(
-        <div onClick={()=> selectTime(hour)} className='available' > {hour} </div>
-      );
-    }else{
-      xhours.push(
-        <div className='notavailable' > {hour} </div>
-      );
-     
-      
-    }
-  })
-
-  const selectTime = (hour) => {
-    //check if call type is selected and address entered if outcall selected. 
-    console.log('call type', outCallLocation);
-    let isAddressOk = true;
-    
-    if(selectedCallType == undefined || selectedCallType == "inCall/outCall"){
-      isAddressOk = false;
-      setIsCalltypeSelected(false);
-    }
-    if(selectedCallType == "outCall"){
-      if(outCallLocation == false){
-        isAddressOk = false;
-        setIsCalltypeSelected(false);
-      }
-    }
-
-
-    if(isAddressOk){
-      setIsTimeSelected(hour)
-      const amount = get10percent(singleModel[0].price);
-      let selected_date = '';
-      if(isDateSelected != ''){
-        selected_date = isDateSelected;
-      }else{
-        selected_date = getTodayDate();
-      }
-      console.log('todays date',  getTodayDate());
-      setOrderData({...orderData, service_time: selected_date + ', ' + hour, amount_received: amount, cardid: '', status: 'Initiated'});
-    
-    }
-   
-
-    
-  }
-
-  const registraionForm = () => {
-    return(
-      <div className='registration-container'>
-        <h2> Fill the form </h2>
-        <form onSubmit={handleCustomerRegistration}>
-          <label for="name">Name:</label>
-          <input type="text" id="name" onChange={handleChange} name="name" value={formData.name}/>
-
-          <label for="email">Email:</label>
-          <input type="email" id="email" onChange={handleChange} name="email" value={formData.email}/>
-
-          <label for="phone">Phone: (Don't add country code +1, don't add white space ) </label>
-          <input type="tel" id="phone" onChange={handleChange} name="phone" value={formData.phone}/>
-
-          <label for="address"> Address:</label>
-          <textarea id="address" onChange={handleChange} name="address" value={formData.address}></textarea>
-          <label for="city">City:</label>
-          <input type="text" id="city" onChange={handleChange} name="city" value={formData.city} />
-          <label for="zip">Zip:</label>
-          <input type="text" id="zip" onChange={handleChange} name="zip" value={formData.zip} />
-
-          <label for="name">Create Password:</label>
-          <input type="password" id="password" onChange={handleChange} name="password"  value={formData.password}  />
-          <input type="hidden" id="selected_model" name="selected_model" value={modelID} />
-              <button className='button' type="submit">Submit</button>
-              {loading && <Loading/>}
-              <h2> {succMessage} </h2>  
-        </form>
-        <div className='button' onClick={()=>setLoginform(true)}> Member? Click to login </div> 
-      </div>
-    );
-  }
-
-  
+// pages/therapistDetails.js
+import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import styles from "../styles/therapistDetails.module.css";
+import BookingModal from "../components/BookingModal";
+import LoginModal from "../components/LoginModal";
+import { formatTime12Hour, isTimeInPast } from "../utils/timeFormat";
+
+// Local YYYY-MM-DD (no UTC day shift)
+const formatDate = (d) =>
+  new Date(d.getFullYear(), d.getMonth(), d.getDate()).toLocaleDateString(
+    "en-CA"
+  );
+
+const toLocalDateObj = (iso) => {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d);
+};
+
+export default function TherapistDetails() {
+  const [therapist, setTherapist] = useState(null);
+
+  // Availability
+  const [availability, setAvailability] = useState([]); // [{ date: "YYYY-MM-DD", slots: ["09:00", ...] }]
+  const [loadingAvail, setLoadingAvail] = useState(false);
+  const [availError, setAvailError] = useState("");
+
+  // Selections
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [callType, setCallType] = useState("");
+
+  // Booking
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  // Dummy reviews
+  const [rating] = useState(4.2);
+  const reviews = [
+    {
+      name: "Justin Lewis",
+      stars: 4,
+      text: "Bringing the girl to my doorstep was the best decision ever!",
+    },
+    {
+      name: "Cameron Wright",
+      stars: 4,
+      text: "Great experience and on-time service.",
+    },
+    {
+      name: "Tyler Mitchell",
+      stars: 4,
+      text: "Loved the experience. Will book again.",
+    },
+  ];
+
+  // Load therapist + availability
   useEffect(() => {
-    
-    singleApiUrl = localStorage.getItem('singleModelApiUrl');
-    const urlParams = new URLSearchParams(singleApiUrl);
-    let tempdate = urlParams.get('date');
-    setTdate(tempdate);
-    console.log("ap url", singleApiUrl);
+    try {
+      const stored = localStorage.getItem("selectedTherapist");
+      if (stored) {
+        const t = JSON.parse(stored);
+        setTherapist(t);
 
-    userLogin();
-    // const { data } = 
-    // console.log('data', data);
-    // const modelUrl = 'https://tsm.spagram.com/api/models.php' +  '?id=' + data
-    const getData = async () => {
-        try {
-          const response = await axios.get(singleApiUrl);
-          setSingleModel(response.data);
-          // singleModel && calltypeSelector("inCall");
-          // console.log('sdd', response.data[0].location_type);
-          // const timeout = setTimeout(() => {
-          //    calltypeSelector("inCall");
-          // }, 10000)
+        // Fetch availability for therapist.id
+        const controller = new AbortController();
+        (async () => {
+          try {
+            setLoadingAvail(true);
+            setAvailError("");
+            const url = `https://tsm.spagram.com/api/availability.php?modelid=${encodeURIComponent(
+              t.id
+            )}`;
+            const res = await axios.get(url, { signal: controller.signal });
 
-          const urlParams = new URLSearchParams(singleApiUrl);
-          // setIsDateSelected(urlParams.get('date'));
-          // setIsDateSelected('4/8/2023');
-          // setIsDateSelected(urlParams.get('time'));
-          let modId = singleApiUrl.split("=")[1];
-          console.log('modid, di', modId);
-          modId = modId.split('&')[0];
-          console.log('modid, di', modId);
-          setModelID( modId );
-          setOrderData({
-            ...orderData,
-            model_id: modId
-          });
-  
-          
-          console.log('surl',singleApiUrl)
-          console.log('sdata',response.data)
-          updateAvailTime(modId, '');
+            // Accept either a bare array or { data: [...] }
+            const list = Array.isArray(res.data)
+              ? res.data
+              : Array.isArray(res.data?.data)
+              ? res.data.data
+              : [];
 
-          setError(null);
-        } catch (err) {
-          setError(err.message);
-          setSingleModel(null);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      // let modid = singleApiUrl.split("=")[1];
-
-      console.log('date and time', isDateSelected, '---', isTimeSelected);
-
-        getData();
-  //       const availabilityUrl = 'https://tsm.spagram.com/api/availability.php?id=' + singleApiUrl.split("=")[1] + 'date=' + isDateSelected + 'time=' + isTimeSelected;
- 
-  }, [singleApiUrl]);
-
-
- 
-  return (
-    <Layout>
-      <Head>
-        <title> Book a model </title>
-      </Head>
-      <div className="bookingpage">
-      {/* <SquareForm /> */}
-       
-            <div className='modelInfoCnt'> 
-                <h1>   </h1>
-                <h1>   </h1>
-
-
-                {loading && <div>Loading...</div>}
-                    {error && (
-                    <div>{`There is a problem fetching the post data - ${error}`}</div>
-                )}
-
-                {/* {singleModel && console.log('smodel', ...singleModel) } */}
-
-                {singleModel && <SingleModelView  {...singleModel}  />  }    
-                {/* {singleModel && showSingleModelAndinCall()  }     */}
-                {/* { singleModel && callDefaultFunctions() }     */}
-                <div class="gallery"> <h1>  </h1> </div>
-                <ModelReview />
-            </div>
-            { !isTimeSelected? 
-              <div className='date-selector'> 
-              <h2 className='mktitle'> Make an Appointment with { singleModel && singleModel[0].name} </h2>
-              <p className='smallfont'> Booking fee is ${ singleModel && get10percent(singleModel[0].price) } (10% of ${singleModel && singleModel[0].price})  </p>
-              <p class={isCalltypeSelected? ' ' : 'warnlable'}> Select Call type </p>
-                { singleModel && location_selector() 
-                  
-                 
-                  
-                
-                }
-                <div className='date-changer'>
-                  <a onClick={()=>goPrevDay(isDateSelected? isDateSelected : tdate)}> Back &nbsp;&nbsp; </a>
-                    <strong>  {isDateSelected? isDateSelected : tdate} </strong> 
-                  <a onClick={()=>goNextDay(isDateSelected? isDateSelected : tdate)}> &nbsp;&nbsp; Next </a>
-                </div>
-                <div> Select Green box. if All is booked then click next button above </div>
-                <div className='timeCardCnt'>
-                    {xhours}
-                </div>
-
-                
-                
-             </div>
-
-              :
-              <div className='forms'> 
-              <div>
-            {!isLoggedIn? 
-              <div className='col2 bookarea'>
-                {loginform ? 
-                      <div className="registration-container">
-                          <p className='selected_label'>Selected date: {isDateSelected? isDateSelected: tdate}, Time: {isTimeSelected} <span className='anchor' onClick={()=>setIsTimeSelected(false)}> Change </span>  </p>
-                          <form onSubmit={handleLogin}>
-                              
-                              <div>
-                                <h2> Login to Book an Appointment </h2>
-                                  <label>Email:</label>
-                                  <input type="email" id="email" name="email" onChange={handleLoginFieldChange} required/>
-                              </div>
-                              <div>
-                                  <label>Password:</label>
-                                  <input type="password" id="password" name="password" onChange={handleLoginFieldChange}  required/>
-                              </div>
-                              
-                              <button className='button' type="submit">Submit</button>
-                              <p className='message'> {message}</p>
-                          </form>
-
-                          <p> {loginmessage} </p>
-
-                          <div className='button' onClick={()=>setLoginform(false)}> Not a member? Click to register </div> 
-                       </div>
-                : 
-                   
-                  showSaveCard? cardForm() : registraionForm()  
-                }
-                  
-              </div>   
-            :
-              <div className='order-box'> 
-                <div className='order-summary'>
-                <p> Selected Date/Time: <strong> {isDateSelected == '' ? getTodayDate() : isDateSelected } | {isTimeSelected} </strong> <span className='anchor' onClick={()=>setIsTimeSelected(false)}> Change </span> </p>
-                <p> Price: ${ get10percent(singleModel[0].price) } (10% of ${singleModel[0].price} )  </p>
-                </div>
-
-                <p> Use the Saved card {getcardEndingwith()}  </p>
-                <a onClick={() => setShowCardForm(true)}> Use a new debit/credit card </a>
-                {showCardForm? 
-                  <div className='cardform'> 
-                    <SquareForm />
-                  </div> 
-                : '' 
-                }
-               <br/>
-                <a className='button' onClick={confirmorder}> Reserve the Appointment   </a> 
-                <p> {succMessage} </p>
-              </div>
+            setAvailability(list);
+            if (list.length > 0) setSelectedDate(list[0].date);
+          } catch (e) {
+            if (e.name !== "CanceledError") {
+              setAvailError("Failed to load availability.");
             }
+          } finally {
+            setLoadingAvail(false);
+          }
+        })();
+
+        return () => controller.abort();
+      }
+    } catch {
+      // ignore parse errors
+    }
+  }, []);
+
+  // Reset slot when date changes
+  useEffect(() => setSelectedSlot(null), [selectedDate]);
+
+  // Filter valid slots (hide past hours for today)
+  const validSlots = useMemo(() => {
+    if (!selectedDate) return [];
+    const record = availability.find((d) => d.date === selectedDate);
+    if (!record) return [];
+
+    const todayStr = formatDate(new Date());
+    if (selectedDate !== todayStr) return record.slots || [];
+
+    return (record.slots || []).filter(
+      (slot) => !isTimeInPast(slot, selectedDate)
+    );
+  }, [availability, selectedDate]);
+
+  // Booking validation
+  const validateBookingData = () => {
+    const customerId = localStorage.getItem("customertoken");
+    const hasCustomerId = !!customerId;
+    const hasTherapist = !!therapist;
+    const hasCallType = !!callType;
+    const hasDate = !!selectedDate;
+    const hasSlot = !!selectedSlot;
+    const hasServiceAddress = !!(
+      therapist?.service_area_primary || therapist?.service_area
+    );
+
+    return {
+      isValid:
+        hasCustomerId &&
+        hasTherapist &&
+        hasCallType &&
+        hasDate &&
+        hasSlot &&
+        hasServiceAddress,
+      missing: {
+        customerId: !hasCustomerId,
+        therapist: !hasTherapist,
+        callType: !hasCallType,
+        date: !hasDate,
+        slot: !hasSlot,
+        serviceAddress: !hasServiceAddress,
+      },
+    };
+  };
+
+  // Helper to decode JWT and extract customer ID
+  const getCustomerIdFromToken = () => {
+    const token = localStorage.getItem("customertoken");
+    if (!token) return null;
+
+    // If token is a simple numeric ID, return it directly
+    if (/^\d+$/.test(token)) {
+      return token;
+    }
+
+    // Otherwise, try to decode as JWT
+    try {
+      const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+      const json = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      const payload = JSON.parse(json);
+      return payload?.id || payload?.userId || payload?.customer_id || null;
+    } catch {
+      // If JWT decode fails, return the token itself if it looks like a number
+      return /^\d+$/.test(token) ? token : null;
+    }
+  };
+
+  // Create booking against API
+  const createBooking = async () => {
+    const customerToken = localStorage.getItem("customertoken");
+
+    if (!customerToken) {
+      setSaveError("Please log in to make a booking.");
+      return;
+    }
+
+    // Extract customer ID from JWT token
+    const customerId = getCustomerIdFromToken();
+
+    if (!customerId) {
+      setSaveError("Unable to identify customer. Please log in again.");
+      return;
+    }
+
+    // Ensure zero-padded hour so PHP 'H:i:s' parser accepts it
+    const [h, m] = selectedSlot.split(":");
+    const hh = String(h).padStart(2, "0");
+    const service_time = `${selectedDate} ${hh}:${m}:00`; // "YYYY-MM-DD HH:mm:ss"
+
+    const payload = {
+      customer_id: customerId,
+      model_id: therapist.id,
+      service_time,
+      call_type: callType, // "incall" | "outcall"
+      service_address:
+        therapist.service_area_primary || therapist.service_area || "",
+      price: therapist.price,
+    };
+
+    try {
+      setSaving(true);
+      setSaveError("");
+
+      const res = await axios.post(
+        "https://tsm.spagram.com/api/create-order.php",
+        payload,
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      const ok = res.data === "1" || res.data?.success === "1";
+      if (!ok) {
+        throw new Error(res.data?.message || "Booking failed");
+      }
+      setShowBookingModal(true);
+    } catch (e) {
+      setSaveError(e?.message || "Could not create booking.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleBookNow = () => {
+    const { isValid, missing } = validateBookingData();
+
+    if (!isValid) {
+      if (missing.customerId) {
+        setSaveError("Please log in to make a booking.");
+      } else if (missing.callType) {
+        setSaveError("Please select call type (in-call or out-call).");
+      } else if (missing.date) {
+        setSaveError("Please select a date.");
+      } else if (missing.slot) {
+        setSaveError("Please select a time slot.");
+      } else if (missing.serviceAddress) {
+        setSaveError("Service address information is missing.");
+      } else {
+        setSaveError("Please complete all booking information.");
+      }
+      return;
+    }
+    createBooking();
+  };
+
+  return (
+    <div className={styles.wrapper}>
+      {therapist ? (
+        <div className={styles.layout}>
+          {/* Left panel */}
+          <div className={styles.leftPanel}>
+            <div className={styles.imageContainer}>
+              <img
+                src={therapist.picture_url || "/images/default.jpg"}
+                alt={therapist.name}
+                className={styles.profilePic}
+              />
+            </div>
+            <div className={styles.details}>
+              <p>
+                <strong>Name:</strong> {therapist.name}
+              </p>
+              <p>
+                <strong>Service Areas:</strong>{" "}
+                {therapist.service_area_primary || therapist.service_area}
+              </p>
+              <p>
+                <strong>Price:</strong> ${therapist.price}/hr
+              </p>
+              <p>
+                <strong>Gender:</strong> {therapist.gender}
+              </p>
+              <p>
+                <strong>Ethnicities:</strong> {therapist.ethnicity}
+              </p>
+              <p>
+                <strong>Height:</strong> {therapist.height}
+              </p>
+              <p>
+                <strong>Age:</strong> {therapist.age}
+              </p>
+            </div>
           </div>
 
-          </div> ///end of forms after date/time selection box
-            
-          }
-            
+          {/* Right panel */}
+          <div className={styles.rightPanel}>
+            <h3>Make an Appointment with {therapist.name}</h3>
+            <p>
+              Booking fee is $
+              {therapist?.price ? (therapist.price * 0.1).toFixed(2) : "—"} (10%
+              of ${therapist?.price ?? "—"})
+            </p>
+
+            <div className={styles.callTypeGroup}>
+              <label>
+                <input
+                  type="radio"
+                  name="calltype"
+                  value="incall"
+                  checked={callType === "incall"}
+                  onChange={(e) => setCallType(e.target.value)}
+                />
+                inCall
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="calltype"
+                  value="outcall"
+                  checked={callType === "outcall"}
+                  onChange={(e) => setCallType(e.target.value)}
+                />
+                outCall
+              </label>
+            </div>
+
+            {loadingAvail && <p>Loading availability…</p>}
+            {!loadingAvail && availError && <p>{availError}</p>}
+
+            {!loadingAvail && !availError && availability.length > 0 && (
+              <div className={styles.calendarContainer}>
+                {(() => {
+                  // Group dates by month
+                  const groupedByMonth = availability.reduce((acc, day) => {
+                    const date = toLocalDateObj(day.date);
+                    const monthKey = date.toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                    });
+
+                    if (!acc[monthKey]) {
+                      acc[monthKey] = [];
+                    }
+                    acc[monthKey].push(day);
+                    return acc;
+                  }, {});
+
+                  return Object.entries(groupedByMonth).map(
+                    ([monthName, days]) => (
+                      <div key={monthName} className={styles.monthSection}>
+                        <h4 className={styles.monthHeader}>{monthName}</h4>
+                        <div className={styles.datesRow}>
+                          {days.map((day) => (
+                            <div
+                              key={day.date}
+                              className={`${styles.dateBlock} ${
+                                selectedDate === day.date ? styles.active : ""
+                              }`}
+                              onClick={() => setSelectedDate(day.date)}
+                            >
+                              <div className={styles.dayOfWeek}>
+                                {toLocalDateObj(day.date)
+                                  .toLocaleDateString("en-US", {
+                                    weekday: "short",
+                                  })
+                                  .toUpperCase()}
+                              </div>
+                              <div className={styles.dayNumber}>
+                                {toLocalDateObj(day.date).getDate()}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  );
+                })()}
+              </div>
+            )}
+
+            {!loadingAvail && !availError && selectedDate && (
+              <div className={styles.slots}>
+                {validSlots.length > 0 ? (
+                  validSlots.map((slot) => (
+                    <button
+                      key={slot}
+                      type="button"
+                      className={`${styles.slot} ${
+                        selectedSlot === slot ? styles.selectedSlot : ""
+                      }`}
+                      onClick={() => setSelectedSlot(slot)}
+                    >
+                      {formatTime12Hour(slot)}
+                    </button>
+                  ))
+                ) : (
+                  <p>No available time slots for this date.</p>
+                )}
+              </div>
+            )}
+
+            {saveError && (
+              <div className={styles.error}>
+                <p>{saveError}</p>
+                {saveError.toLowerCase().includes("log in") && (
+                  <button
+                    className={styles.loginButton}
+                    onClick={() => setShowLoginModal(true)}
+                    type="button"
+                  >
+                    Go to Login
+                  </button>
+                )}
+              </div>
+            )}
+
+            <button
+              className={styles.bookButton}
+              onClick={handleBookNow}
+              disabled={saving}
+              title="Complete all selections to enable booking"
+              type="button"
+            >
+              {saving ? "Booking…" : "Book Now"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p>Loading therapist details…</p>
+      )}
+
+      {/* Reviews */}
+      <div className={styles.reviewSection}>
+        <h3>Average Rating</h3>
+        <div className={styles.stars}>
+          {"⭐".repeat(Math.round(rating))}
+          {"☆".repeat(5 - Math.round(rating))}
         </div>
 
-       
-    </Layout>
+        <div className={styles.reviewGrid}>
+          {reviews.map((r, i) => (
+            <div className={styles.reviewItem} key={i}>
+              <strong>{r.name}</strong>
+              <div className={styles.stars}>
+                {"⭐".repeat(r.stars)}
+                {"☆".repeat(5 - r.stars)}
+              </div>
+              <p>{r.text}</p>
+            </div>
+          ))}
+        </div>
+
+        <a href="#" className={styles.loadMore}>
+          Load more.
+        </a>
+      </div>
+
+      {showBookingModal && (
+        <BookingModal
+          therapist={therapist}
+          selectedDate={selectedDate}
+          selectedSlot={selectedSlot}
+          callType={callType}
+          onClose={() => setShowBookingModal(false)}
+        />
+      )}
+
+      {showLoginModal && (
+        <LoginModal user="customer" onClose={() => setShowLoginModal(false)} />
+      )}
+    </div>
   );
 }
-
-export default Booking;

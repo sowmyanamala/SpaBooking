@@ -5,6 +5,10 @@ import AdminLayout, { siteTitle } from "../../components/admin/layout";
 import ordersStyles from "../../styles/admin/orders.module.css";
 import withAuth from "../../components/admin/withAuth";
 import axios from "axios";
+import {
+  formatTime12Hour,
+  formatDateTimeComponents,
+} from "../../utils/timeFormat";
 
 const Orders = () => {
   const [orderData, setOrderData] = useState([]);
@@ -88,13 +92,50 @@ const Orders = () => {
               </thead>
               <tbody>
                 {orderData.map((order) => {
+                  // Debug log to see what data we're getting
+                  console.log("Order data:", order);
+
                   const id = order?.id ?? order?.Id ?? "";
                   const customer =
-                    order?.customer_name ?? order?.customer ?? "N/A";
-                  const model = order?.model_name ?? order?.model ?? "N/A";
-                  const service = order?.service_type ?? order?.call_type ?? "";
-                  const date = order?.date ?? order?.request_time ?? "";
+                    order?.customer_name ??
+                    order?.customer ??
+                    "Unknown Customer";
+                  const model =
+                    order?.model_name ?? order?.model ?? "Unknown Therapist";
+                  const service =
+                    order?.call_type ??
+                    order?.service_type ??
+                    "Unknown Service";
+                  const date = order?.request_time ?? order?.date ?? "";
                   const time = order?.service_time ?? order?.time ?? "";
+
+                  // Format time to 12-hour format
+                  const formattedTime = time ? formatTime12Hour(time) : "N/A";
+
+                  // Format date properly - handle different date formats
+                  let formattedDate = "N/A";
+                  if (date) {
+                    try {
+                      // Try to parse the date
+                      const dateObj = new Date(date);
+                      if (!isNaN(dateObj.getTime())) {
+                        formattedDate = dateObj.toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        });
+                      }
+                    } catch (error) {
+                      console.error(
+                        "Date parsing error:",
+                        error,
+                        "for date:",
+                        date
+                      );
+                      formattedDate = date; // Fallback to original date string
+                    }
+                  }
+
                   const status =
                     order?.status ?? order?.order_status ?? "Initiated";
                   const amount = order?.amount ?? order?.total ?? "N/A";
@@ -112,8 +153,8 @@ const Orders = () => {
                       <td className={ordersStyles.td}>{customer}</td>
                       <td className={ordersStyles.td}>{model}</td>
                       <td className={ordersStyles.td}>{service}</td>
-                      <td className={ordersStyles.td}>{date}</td>
-                      <td className={ordersStyles.td}>{time}</td>
+                      <td className={ordersStyles.td}>{formattedDate}</td>
+                      <td className={ordersStyles.td}>{formattedTime}</td>
                       <td className={ordersStyles.td}>
                         <span
                           className={`${ordersStyles.statusBadge} ${statusClass}`}

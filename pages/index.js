@@ -9,6 +9,8 @@ export default function Home() {
   const API_BASE = "https://tsm.spagram.com/api/filter-models.php";
 
   const [therapists, setTherapists] = useState([]);
+  const [verifiedTherapists, setVerifiedTherapists] = useState(new Set());
+  const [isLoading, setIsLoading] = useState(true);
   const [filteredUrl, setFilteredUrl] = useState(API_BASE);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
@@ -33,15 +35,39 @@ export default function Home() {
     }
   }, []);
 
+  // fetch therapists and verification status together
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch therapists
+      const therapistsResponse = await fetch(filteredUrl);
+      const therapistsData = await therapistsResponse.json();
+      console.log("Therapists API Response", therapistsData);
+      const therapistData = Array.isArray(therapistsData) ? therapistsData : [];
+      setTherapists(therapistData);
+
+      // Fetch verification status
+      const verificationResponse = await fetch(
+        "https://tsm.spagram.com/api/get-verification-status.php"
+      );
+      const verificationData = await verificationResponse.json();
+      if (verificationData.success && verificationData.verified_ids) {
+        setVerifiedTherapists(new Set(verificationData.verified_ids));
+        console.log(
+          "Verified therapists loaded:",
+          verificationData.verified_ids
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // fetch whenever URL changes
   useEffect(() => {
-    fetch(filteredUrl)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("API Response", data);
-        setTherapists(Array.isArray(data) ? data : []);
-      })
-      .catch((err) => console.error(err));
+    fetchData();
   }, [filteredUrl]);
 
   const handleInputChange = (e) => {
@@ -219,7 +245,11 @@ export default function Home() {
       )}
 
       {/* RESULTS GRID */}
-      {therapists.length === 0 ? (
+      {isLoading ? (
+        <p style={{ textAlign: "center", margin: "2rem 0", color: "#666" }}>
+          Loading therapists...
+        </p>
+      ) : therapists.length === 0 ? (
         <p style={{ textAlign: "center", margin: "2rem 0", color: "#666" }}>
           No therapists match those filters yet—try clearing a filter or
           searching a different area.
@@ -227,7 +257,7 @@ export default function Home() {
       ) : (
         <section className={styles.grid}>
           {therapists
-            .filter((t) => t.name && t.name.trim() !== "") // Filter out therapists with empty names
+            .filter((t) => t.name && t.name.trim() !== "") // Filter out therapists with empty names (temporarily removed verification filter)
             .map((t, i) => (
               <div
                 key={i}
