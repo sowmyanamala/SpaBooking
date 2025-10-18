@@ -57,6 +57,9 @@ const Profile = () => {
     status: "",
   });
 
+  const [heightFeet, setHeightFeet] = useState("");
+  const [heightInches, setHeightInches] = useState("");
+
   const areas = [
     {
       label: "New York",
@@ -149,6 +152,24 @@ const Profile = () => {
 
   const handleInputChange = (e) => {
     setModel({ ...model, [e.target.name]: e.target.value });
+  };
+
+  const handleHeightFeetChange = (e) => {
+    const feet = e.target.value;
+    setHeightFeet(feet);
+    // Update model.height with formatted string
+    if (feet || heightInches) {
+      setModel({ ...model, height: `${feet}'${heightInches}"` });
+    }
+  };
+
+  const handleHeightInchesChange = (e) => {
+    const inches = e.target.value;
+    setHeightInches(inches);
+    // Update model.height with formatted string
+    if (heightFeet || inches) {
+      setModel({ ...model, height: `${heightFeet}'${inches}"` });
+    }
   };
 
   const handleFileUpload = (e) => {
@@ -286,6 +307,29 @@ const Profile = () => {
         let locationTypeArr = result.location_type.split(",");
         let servicesArr = result.services.split(",");
         setSelectedServices(servicesArr);
+
+        // Parse height from format like "5'2"" or "5.7"
+        let feet = "";
+        let inches = "";
+        if (result.height) {
+          const heightMatch = result.height.match(/(\d+)'(\d+)"/);
+          if (heightMatch) {
+            feet = heightMatch[1];
+            inches = heightMatch[2];
+          } else {
+            // Handle old decimal format (e.g., 5.7 -> 5'7")
+            const decimalHeight = parseFloat(result.height);
+            if (!isNaN(decimalHeight)) {
+              feet = Math.floor(decimalHeight).toString();
+              inches = Math.round(
+                (decimalHeight - Math.floor(decimalHeight)) * 10
+              ).toString();
+            }
+          }
+        }
+        setHeightFeet(feet);
+        setHeightInches(inches);
+
         setModel({
           slug: result.slug,
           name: result.name,
@@ -547,14 +591,41 @@ const Profile = () => {
 
             {/* Height */}
             <div className={modelCss.formGroup}>
-              <label>Height (in feet, ie 5.7)</label>
-              <input
-                type="text"
-                onChange={handleInputChange}
-                name="height"
-                value={model.height}
-                className={modelCss.input}
-              />
+              <label>Height</label>
+              <div
+                style={{ display: "flex", gap: "10px", alignItems: "center" }}
+              >
+                <div style={{ flex: 1 }}>
+                  <input
+                    type="number"
+                    onChange={handleHeightFeetChange}
+                    name="heightFeet"
+                    value={heightFeet}
+                    placeholder="Feet"
+                    min="0"
+                    max="8"
+                    className={modelCss.input}
+                  />
+                  <span style={{ fontSize: "12px", color: "#666" }}>Feet</span>
+                </div>
+                <span style={{ fontSize: "20px" }}>'</span>
+                <div style={{ flex: 1 }}>
+                  <input
+                    type="number"
+                    onChange={handleHeightInchesChange}
+                    name="heightInches"
+                    value={heightInches}
+                    placeholder="Inches"
+                    min="0"
+                    max="11"
+                    className={modelCss.input}
+                  />
+                  <span style={{ fontSize: "12px", color: "#666" }}>
+                    Inches
+                  </span>
+                </div>
+                <span style={{ fontSize: "20px" }}>"</span>
+              </div>
             </div>
 
             {/* Color */}

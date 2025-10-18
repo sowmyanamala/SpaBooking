@@ -5,7 +5,14 @@ import { usePathname } from "next/navigation";
 import utilStyles from "../../styles/utils.module.css";
 import modelStyle from "../../styles/model.module.css";
 import Link from "next/link";
-import { BookOpenCheck, CalendarDays, LogOut, Mail, User } from "lucide-react";
+import {
+  BookOpenCheck,
+  CalendarDays,
+  LogOut,
+  Mail,
+  User,
+  ShieldCheck,
+} from "lucide-react";
 // import CrispWithNoSSR from "../crisp";
 
 const name = "Massage at Home";
@@ -26,6 +33,11 @@ export default function Layout({ children, home, availability, orders }) {
       icon: User,
     },
     {
+      href: "/model-backend/verification",
+      label: "Verification",
+      icon: ShieldCheck,
+    },
+    {
       href: "/model-backend/availability",
       label: "Availability",
       icon: CalendarDays,
@@ -41,6 +53,11 @@ export default function Layout({ children, home, availability, orders }) {
       icon: LogOut,
     },
   ];
+
+  // Filter out any items with undefined href
+  const validNavItems = navItems.filter(
+    (item) => item.href && item.href !== "undefined"
+  );
   return (
     <div
       className={
@@ -116,7 +133,7 @@ export default function Layout({ children, home, availability, orders }) {
                 alt=""
               />
             </Link>
-            {navItems.map(({ href, label, icon: Icon }) => (
+            {validNavItems.map(({ href, label, icon: Icon }) => (
               <li key={href}>
                 <Link
                   href={href}

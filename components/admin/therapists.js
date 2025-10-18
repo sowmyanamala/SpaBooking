@@ -1,35 +1,65 @@
 // components/admin/therapists.js
 import { useState, useEffect } from "react";
 import styles from "./layout.module.css";
+import CheckrVerificationStatus from "../verification/CheckrVerificationStatus";
 
 const API = "/api/admin/therapists"; // ← therapists proxy with fallback
 
 export default function Therapists() {
   const [rows, setRows] = useState([]);
   const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const limit = 25;
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+  const [selectedTherapist, setSelectedTherapist] = useState(null);
+  const [showVerificationStatus, setShowVerificationStatus] = useState(false);
 
   const load = async () => {
     setLoading(true);
     setErr("");
     try {
+      // Use PHP API directly since Next.js has database connection issues
       const res = await fetch(
-        `${API}?page=${page}&limit=${limit}&t=${Date.now()}`,
+        `https://tsm.spagram.com/api/therapists.php?page=${page}&limit=${limit}&t=${Date.now()}`,
         {
           cache: "no-store",
         }
       );
-      const j = await res.json();
-      console.log("Therapists API response:", j);
-      const ok =
-        res.ok &&
-        (j?.success === 1 || j?.success === "1" || j?.success === true);
-      if (!ok) throw new Error(j?.message || `HTTP ${res.status}`);
-      const data = Array.isArray(j.data) ? j.data : [];
-      console.log("Therapists data:", data);
-      setRows(data);
+      const responseData = await res.json();
+      console.log("Therapists PHP API response:", responseData);
+      
+      if (!responseData.success || !Array.isArray(responseData.data)) {
+        throw new Error("Invalid data format from PHP API");
+      }
+      
+      const data = responseData.data;
+
+      // Get verification status from PHP API
+      const verificationRes = await fetch(
+        "https://tsm.spagram.com/api/get-verification-status.php"
+      );
+      const verificationData = await verificationRes.json();
+      const verifiedIds = verificationData.success
+        ? verificationData.verified_ids
+        : [];
+      console.log("Verified therapist IDs:", verifiedIds);
+
+      // Map the data and add verification status
+      const mappedData = data.map((therapist) => ({
+        ...therapist,
+        status:
+          therapist.status === "ready"
+            ? "active"
+            : therapist.status === "pending"
+            ? "suspended"
+            : therapist.status || "active",
+        verified: verifiedIds.includes(therapist.id),
+      }));
+
+      console.log("Mapped therapists data with verification:", mappedData);
+      setRows(mappedData);
+      setTotal(responseData.total || mappedData.length);
     } catch (e) {
       setErr(e.message || "Failed to load therapists");
     } finally {
@@ -92,6 +122,43 @@ export default function Therapists() {
     }
   };
 
+  const handleToggleVerification = async (id, currentVerified) => {
+    const newVerified = !currentVerified;
+    try {
+      const res = await fetch(
+        `https://tsm.spagram.com/api/toggle-verification.php?id=${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ verified: newVerified }),
+        }
+      );
+      const j = await res.json();
+      const ok =
+        res.ok &&
+        (j?.success === 1 || j?.success === "1" || j?.success === true);
+      if (ok) {
+        setRows((u) =>
+          u.map((r) => (r.id === id ? { ...r, verified: newVerified } : r))
+        );
+        // Show success message
+        alert(
+          `Therapist ${newVerified ? "verified" : "unverified"} successfully!`
+        );
+      } else {
+        alert(j?.message || "Failed to update verification status");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Failed to update verification status");
+    }
+  };
+
+  const handleViewVerification = (therapist) => {
+    setSelectedTherapist(therapist);
+    setShowVerificationStatus(true);
+  };
+
   if (loading) return <p>Loading…</p>;
   if (err) return <p style={{ color: "crimson" }}>Error: {err}</p>;
 
@@ -132,6 +199,8 @@ export default function Therapists() {
             <th>Service Area</th>
             <th>Gender</th>
             <th>Status</th>
+            <th>Verified</th>
+            <th>Verification</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -146,6 +215,52 @@ export default function Therapists() {
               <td>{t.gender || "N/A"}</td>
               <td>
                 <span className={styles.badge}>{t.status || "active"}</span>
+              </td>
+              <td>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                >
+                  <span
+                    className={styles.badge}
+                    style={{
+                      backgroundColor: t.verified ? "#10b981" : "#ef4444",
+                      color: "white",
+                    }}
+                  >
+                    {t.verified ? "Yes" : "No"}
+                  </span>
+                  <button
+                    onClick={() => handleToggleVerification(t.id, t.verified)}
+                    style={{
+                      padding: "4px 8px",
+                      fontSize: "12px",
+                      backgroundColor: t.verified ? "#ef4444" : "#10b981",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                    title={t.verified ? "Click to unverify" : "Click to verify"}
+                  >
+                    {t.verified ? "Unverify" : "Verify"}
+                  </button>
+                </div>
+              </td>
+              <td>
+                <button
+                  onClick={() => handleViewVerification(t)}
+                  style={{
+                    padding: "4px 8px",
+                    fontSize: "12px",
+                    backgroundColor: "#3b82f6",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                  }}
+                >
+                  View Status
+                </button>
               </td>
               <td style={{ display: "flex", gap: 8 }}>
                 <button
@@ -171,6 +286,66 @@ export default function Therapists() {
         <span>Page {page}</span>
         <button onClick={() => setPage((p) => p + 1)}>Next</button>
       </div>
+
+      {/* Verification Status Modal */}
+      {showVerificationStatus && selectedTherapist && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+            padding: "20px",
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: "8px",
+              padding: "20px",
+              maxWidth: "800px",
+              width: "100%",
+              maxHeight: "80vh",
+              overflowY: "auto",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "20px",
+                borderBottom: "1px solid #e5e7eb",
+                paddingBottom: "16px",
+              }}
+            >
+              <h2>Verification Status - {selectedTherapist.name}</h2>
+              <button
+                onClick={() => {
+                  setShowVerificationStatus(false);
+                  setSelectedTherapist(null);
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "24px",
+                  cursor: "pointer",
+                  color: "#6b7280",
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <CheckrVerificationStatus therapistId={selectedTherapist.id} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

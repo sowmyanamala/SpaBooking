@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import Head from "next/head";
 import Layout from "../components/layout";
+import GeoMap from "../components/GeoMap";
 import styles from "../styles/Home.module.css";
+import geoStyles from "../styles/geo.module.css";
 import Ethnicities from "../components/data/ethnicities.js";
 import services from "../components/data/services";
 
@@ -11,6 +13,7 @@ export default function Home() {
   const [therapists, setTherapists] = useState([]);
   const [filteredUrl, setFilteredUrl] = useState(API_BASE);
   const [showFilters, setShowFilters] = useState(false);
+  const [showMapView, setShowMapView] = useState(false);
   const [filters, setFilters] = useState({
     location: "",
     gender: "",
@@ -20,28 +23,19 @@ export default function Home() {
   });
   const [searchName, setSearchName] = useState("");
 
-  // Check if user was redirected here due to auth issues
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const authRedirect = urlParams.get("auth_redirect");
-    if (authRedirect === "model") {
-      // Auto-show model login modal with small delay to ensure layout is ready
-      setTimeout(() => {
-        const event = new CustomEvent("showModelLoginModal");
-        window.dispatchEvent(event);
-      }, 100);
-    }
-  }, []);
-
   // fetch whenever URL changes
   useEffect(() => {
+    console.log("Fetching from URL:", filteredUrl); // Debug log
     fetch(filteredUrl)
       .then((res) => res.json())
       .then((data) => {
         console.log("API Response", data);
+        console.log("First 4 therapists:", data.slice(0, 4)); // Debug first 4
         setTherapists(Array.isArray(data) ? data : []);
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error("Fetch error:", err);
+      });
   }, [filteredUrl]);
 
   const handleInputChange = (e) => {
@@ -77,7 +71,7 @@ export default function Home() {
         />
       </Head>
 
-      {/* HERO INTRO (moved INSIDE return) */}
+      {/* HERO INTRO */}
       <header className={styles.hero}>
         <div className={styles.heroInner}>
           <h1 className={styles.title}>Find Your Therapist</h1>
@@ -135,7 +129,23 @@ export default function Home() {
         >
           {showFilters ? "Hide Filters" : "Show Filters"}
         </button>
+        <button
+          className={styles.toggleButton}
+          onClick={() => setShowMapView(!showMapView)}
+        >
+          {showMapView ? "📋 List View" : "🗺️ Map View"}
+        </button>
       </div>
+
+      {/* MAP VIEW */}
+      {showMapView && (
+        <div
+          className={geoStyles.mapWrapper}
+          style={{ margin: "20px auto", maxWidth: "1200px" }}
+        >
+          <GeoMap />
+        </div>
+      )}
 
       {/* FILTERS */}
       {showFilters && (
@@ -226,30 +236,33 @@ export default function Home() {
         </p>
       ) : (
         <section className={styles.grid}>
-          {therapists
-            .filter((t) => t.name && t.name.trim() !== "") // Filter out therapists with empty names
-            .map((t, i) => (
-              <div
-                key={i}
-                className={styles.card}
-                onClick={() => {
-                  localStorage.setItem("selectedTherapist", JSON.stringify(t));
-                  window.location.href = "/therapistDetails";
+          {therapists.map((t, i) => (
+            <div
+              key={t.id || i} // Use therapist ID if available
+              className={styles.card}
+              onClick={() => {
+                localStorage.setItem("selectedTherapist", JSON.stringify(t));
+                window.location.href = "/therapistDetails";
+              }}
+            >
+              <img
+                src={t.picture_url || "/images/model.jpeg"} // Use existing model.jpeg as fallback
+                alt={t.name || "Therapist"}
+                className={styles.image}
+                onError={(e) => {
+                  e.target.src = "/images/model.jpeg"; // Fallback if image fails to load
                 }}
-              >
-                <img
-                  src={t.picture_url || "/images/model.jpeg"}
-                  alt={t.name || "Therapist"}
-                  className={styles.image}
-                />
-                <div className={styles.cardOverlay}>
-                  <h3>{t.name || "Unknown Therapist"}</h3>
-                  <p>
-                    {t.service_area_primary || t.service_area || "Service Area"}
-                  </p>
-                </div>
+              />
+              <div className={styles.cardOverlay}>
+                <h3>{t.name || "Unknown Therapist"}</h3>
+                <p>
+                  {t.service_area_primary ||
+                    t.service_area ||
+                    "Massage Therapy"}
+                </p>
               </div>
-            ))}
+            </div>
+          ))}
         </section>
       )}
     </Layout>
