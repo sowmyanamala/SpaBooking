@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Head from "next/head";
 import Layout from "../components/layout";
+import GeoMap from "../components/GeoMap";
 import styles from "../styles/Home.module.css";
+import geoStyles from "../styles/geo.module.css";
 import Ethnicities from "../components/data/ethnicities.js";
 import services from "../components/data/services";
 
@@ -9,10 +11,9 @@ export default function Home() {
   const API_BASE = "https://tsm.spagram.com/api/filter-models.php";
 
   const [therapists, setTherapists] = useState([]);
-  const [verifiedTherapists, setVerifiedTherapists] = useState(new Set());
-  const [isLoading, setIsLoading] = useState(true);
   const [filteredUrl, setFilteredUrl] = useState(API_BASE);
   const [showFilters, setShowFilters] = useState(false);
+  const [showMapView, setShowMapView] = useState(false);
   const [filters, setFilters] = useState({
     location: "",
     gender: "",
@@ -22,52 +23,19 @@ export default function Home() {
   });
   const [searchName, setSearchName] = useState("");
 
-  // Check if user was redirected here due to auth issues
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const authRedirect = urlParams.get("auth_redirect");
-    if (authRedirect === "model") {
-      // Auto-show model login modal with small delay to ensure layout is ready
-      setTimeout(() => {
-        const event = new CustomEvent("showModelLoginModal");
-        window.dispatchEvent(event);
-      }, 100);
-    }
-  }, []);
-
-  // fetch therapists and verification status together
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      // Fetch therapists
-      const therapistsResponse = await fetch(filteredUrl);
-      const therapistsData = await therapistsResponse.json();
-      console.log("Therapists API Response", therapistsData);
-      const therapistData = Array.isArray(therapistsData) ? therapistsData : [];
-      setTherapists(therapistData);
-
-      // Fetch verification status
-      const verificationResponse = await fetch(
-        "https://tsm.spagram.com/api/get-verification-status.php"
-      );
-      const verificationData = await verificationResponse.json();
-      if (verificationData.success && verificationData.verified_ids) {
-        setVerifiedTherapists(new Set(verificationData.verified_ids));
-        console.log(
-          "Verified therapists loaded:",
-          verificationData.verified_ids
-        );
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // fetch whenever URL changes
   useEffect(() => {
-    fetchData();
+    console.log("Fetching from URL:", filteredUrl); // Debug log
+    fetch(filteredUrl)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("API Response", data);
+        console.log("First 4 therapists:", data.slice(0, 4)); // Debug first 4
+        setTherapists(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => {
+        console.error("Fetch error:", err);
+      });
   }, [filteredUrl]);
 
   const handleInputChange = (e) => {
@@ -103,7 +71,7 @@ export default function Home() {
         />
       </Head>
 
-      {/* HERO INTRO (moved INSIDE return) */}
+      {/* HERO INTRO */}
       <header className={styles.hero}>
         <div className={styles.heroInner}>
           <h1 className={styles.title}>Find Your Therapist</h1>
@@ -145,6 +113,29 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {/* MAP VIEW SECTION */}
+      <section className={styles.mapSection}>
+        <div className={styles.mapSectionHeader}>
+          <h2 className={styles.mapSectionTitle}>Find Therapists Near You</h2>
+          <p className={styles.mapSectionDescription}>
+            Use our interactive map to discover therapists in your area with
+            real-time availability
+          </p>
+          <button
+            className={styles.toggleMapButton}
+            onClick={() => setShowMapView(!showMapView)}
+          >
+            {showMapView ? "📋 Switch to List View" : "🗺️ View Map"}
+          </button>
+        </div>
+
+        {showMapView && (
+          <div className={geoStyles.mapWrapper}>
+            <GeoMap />
+          </div>
+        )}
+      </section>
 
       {/* SEARCH BAR */}
       <div className={styles.searchHeader}>
@@ -245,41 +236,40 @@ export default function Home() {
       )}
 
       {/* RESULTS GRID */}
-      {isLoading ? (
-        <p style={{ textAlign: "center", margin: "2rem 0", color: "#666" }}>
-          Loading therapists...
-        </p>
-      ) : therapists.length === 0 ? (
+      {therapists.length === 0 ? (
         <p style={{ textAlign: "center", margin: "2rem 0", color: "#666" }}>
           No therapists match those filters yet—try clearing a filter or
           searching a different area.
         </p>
       ) : (
         <section className={styles.grid}>
-          {therapists
-            .filter((t) => t.name && t.name.trim() !== "") // Filter out therapists with empty names (temporarily removed verification filter)
-            .map((t, i) => (
-              <div
-                key={i}
-                className={styles.card}
-                onClick={() => {
-                  localStorage.setItem("selectedTherapist", JSON.stringify(t));
-                  window.location.href = "/therapistDetails";
+          {therapists.map((t, i) => (
+            <div
+              key={t.id || i} // Use therapist ID if available
+              className={styles.card}
+              onClick={() => {
+                localStorage.setItem("selectedTherapist", JSON.stringify(t));
+                window.location.href = "/therapistDetails";
+              }}
+            >
+              <img
+                src={t.picture_url || "/images/model.jpeg"} // Use existing model.jpeg as fallback
+                alt={t.name || "Therapist"}
+                className={styles.image}
+                onError={(e) => {
+                  e.target.src = "/images/model.jpeg"; // Fallback if image fails to load
                 }}
-              >
-                <img
-                  src={t.picture_url || "/images/model.jpeg"}
-                  alt={t.name || "Therapist"}
-                  className={styles.image}
-                />
-                <div className={styles.cardOverlay}>
-                  <h3>{t.name || "Unknown Therapist"}</h3>
-                  <p>
-                    {t.service_area_primary || t.service_area || "Service Area"}
-                  </p>
-                </div>
+              />
+              <div className={styles.cardOverlay}>
+                <h3>{t.name || "Unknown Therapist"}</h3>
+                <p>
+                  {t.service_area_primary ||
+                    t.service_area ||
+                    "Massage Therapy"}
+                </p>
               </div>
-            ))}
+            </div>
+          ))}
         </section>
       )}
     </Layout>
